@@ -1,16 +1,14 @@
-import React, { useContext } from "react"
-import UserInputContext from "../../_context/UserInputContext"
-import CategoryList from "../../_shared/categoryList"
+import { useContext } from "react";
+import CategoryList from "../../_shared/CategoryList";
+import UserInputContext from "../../_context/UserInputContext";
+
 
 function SelectCategory() {
-  const { userCourseInput, setUserCourseInput } = useContext(UserInputContext)
+  const { userCourseInput, setUserCourseInput } = useContext(UserInputContext);
 
   const handleCategoryChange = (category) => {
-    setUserCourseInput((prev) => ({
-      ...prev,
-      category: category,
-    }))
-  }
+    setUserCourseInput((prev) => ({ ...prev, category }));
+  };
 
   return (
     <div className="px-10 md:px-20">
@@ -21,9 +19,10 @@ function SelectCategory() {
             key={item.id}
             className={`flex flex-col items-center p-5 rounded-xl hover:border-purple-500
                 hover:bg-blue-50 border-b border-gray-200 ${
-                    userCourseInput?.category === item.name ? 'border-purple-400 bg-blue-100' : ''
+                  userCourseInput?.category === item.name
+                    ? 'border-purple-400 bg-blue-100'
+                    : ''
                 }`}
-
             onClick={() => handleCategoryChange(item.name)}
           >
             <img
@@ -38,7 +37,7 @@ function SelectCategory() {
         ))}
       </div>
     </div>
-  )
+  );
 }
 
-export default SelectCategory
+export default SelectCategory;
