@@ -1,6 +1,6 @@
 // app/api/chapters/[courseId]/route.js
-import { db } from "../../../../configs/db.server";
-import { Chapters } from "../../../../configs/schema";
+import { db } from "../../../configs/db.server";
+import { Chapters } from "../../../configs/schema";
 import { eq, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
