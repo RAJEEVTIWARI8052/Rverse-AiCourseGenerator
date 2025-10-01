@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import CourseBasicInfo from "./_components/CourseBasicInfo";
 import CourseDetail from "./_components/CourseDetail";
@@ -10,12 +10,14 @@ import LoadingDialog from "../_components/LoadingDialog";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export default function CourseLayout({ params }) {
-  const { courseId } = use(params); // ✅ unwrap params
+  const { courseId } = params;
   const { isLoaded, user } = useUser();
   const [course, setCourse] = useState(null);
   const [error, setError] = useState(null);
   const [generated, setGenerated] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [generationError, setGenerationError] = useState(null);
+  const [currentChapter, setCurrentChapter] = useState(0);
 
   const fetchCourse = async () => {
     if (!user?.primaryEmailAddress?.emailAddress) return;
@@ -53,10 +55,12 @@ export default function CourseLayout({ params }) {
   const GenerateChapterContent = async () => {
     setLoading(true);
     setGenerated([]);
+    setGenerationError(null);
+    setCurrentChapter(0);
 
     let output = null;
     try {
-      output = JSON.parse(course?.courseOutput); // ✅ parse saved course JSON
+      output = JSON.parse(course?.courseOutput);
     } catch (err) {
       console.error("Invalid JSON in courseOutput", err);
       setLoading(false);
@@ -69,14 +73,17 @@ export default function CourseLayout({ params }) {
       return;
     }
 
+    const results = [];
+
     try {
-      const ai = new GoogleGenerativeAI(
-        process.env.NEXT_PUBLIC_GEMINI_API_KEY
-      );
+      const ai = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY);
       const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-      const results = [];
-      for (const chapter of chapters) {
+      // Process chapters one at a time with delays
+      for (let i = 0; i < chapters.length; i++) {
+        const chapter = chapters[i];
+        setCurrentChapter(i + 1);
+
         const prompt = `
 Explain the concept in Detail on Topic: ${chapter.chapterName}.
 Generate the tutorial in JSON format. 
@@ -86,23 +93,68 @@ Fields:
 - codeExample (if applicable, wrap inside <precode>...</precode>)
         `;
 
-        console.log("Generated Prompt:", prompt);
+        let success = false;
+        let attempts = 0;
+        const maxAttempts = 5;
 
-        const response = await model.generateContent(prompt);
-        const text = response.response.text();
+        while (!success && attempts < maxAttempts) {
+          try {
+            console.log(`Generating chapter ${i + 1}/${chapters.length} (attempt ${attempts + 1})`);
+            
+            const response = await model.generateContent(prompt);
+            const text = response.response.text();
 
-        results.push({
-          chapterName: chapter.chapterName,
-          generatedContent: text,
-        });
+            results.push({
+              chapterName: chapter.chapterName,
+              generatedContent: text,
+            });
+
+            success = true;
+
+            // Add delay between successful requests to avoid rate limits
+            if (i < chapters.length - 1) {
+              await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+
+          } catch (e) {
+            attempts++;
+            console.error(`Error on attempt ${attempts}:`, e);
+
+            if (attempts >= maxAttempts) {
+              // After max attempts, add error result and continue
+              results.push({
+                chapterName: chapter.chapterName,
+                error: `Failed to generate content after ${maxAttempts} attempts. API may be overloaded.`,
+              });
+              success = true; // Mark as done to continue to next chapter
+            } else {
+              // Exponential backoff
+              const waitTime = Math.min(2000 * Math.pow(2, attempts - 1), 20000);
+              console.log(`Waiting ${waitTime / 1000}s before retry...`);
+              await new Promise(resolve => setTimeout(resolve, waitTime));
+            }
+          }
+        }
       }
 
       setGenerated(results);
+
+      // Check if any chapters failed
+      const failedCount = results.filter(r => r.error).length;
+      if (failedCount > 0) {
+        setGenerationError(
+          `${failedCount} chapter(s) failed to generate. The API may be experiencing high traffic. You can try regenerating these chapters later.`
+        );
+      }
+
     } catch (e) {
-      console.error("Error generating content:", e);
-      setGenerated([{ error: "❌ Error generating content. Check console." }]);
+      console.error("Fatal error generating content:", e);
+      setGenerationError(
+        "Failed to generate content. The Gemini API may be overloaded. Please try again in a few minutes."
+      );
     } finally {
       setLoading(false);
+      setCurrentChapter(0);
     }
   };
 
@@ -112,20 +164,44 @@ Fields:
 
       <LoadingDialog loading={loading} />
 
+      {loading && currentChapter > 0 && (
+        <div className="text-center my-4 p-4 bg-blue-50 rounded-lg">
+          <p className="text-blue-700 font-medium">
+            Generating chapter {currentChapter}... Please wait.
+          </p>
+        </div>
+      )}
+
+      {generationError && (
+        <div className="my-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <p className="text-yellow-800">⚠️ {generationError}</p>
+        </div>
+      )}
+
       <CourseBasicInfo course={course} refreshData={fetchCourse} />
       <CourseDetail course={course} />
       <ChapterList course={course} refreshData={fetchCourse} />
 
-      <Button onClick={GenerateChapterContent} className="my-10">
-        Generate Course Content
+      <Button 
+        onClick={GenerateChapterContent} 
+        className="my-10"
+        disabled={loading}
+      >
+        {loading ? "Generating..." : "Generate Course Content"}
       </Button>
 
       {generated.length > 0 && (
         <div className="mt-6 space-y-4">
           {generated.map((item, i) => (
-            <div key={i} className="p-4 bg-gray-100 rounded-xl">
+            <div 
+              key={i} 
+              className={`p-4 rounded-xl ${
+                item.error ? 'bg-red-50 border border-red-200' : 'bg-gray-100'
+              }`}
+            >
               <h3 className="font-semibold mb-2">
                 Chapter: {item.chapterName || "Unknown"}
+                {item.error && <span className="text-red-600 ml-2">❌ Failed</span>}
               </h3>
               <pre className="bg-white p-3 rounded overflow-x-auto text-sm">
                 {item.generatedContent || item.error}
