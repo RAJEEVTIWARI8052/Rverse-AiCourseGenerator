@@ -30,8 +30,14 @@ export default function FinishPage() {
         }),
       ]);
 
-      if (!courseRes.ok) throw new Error(`Failed to fetch course: ${courseRes.status}`);
-      if (!chaptersRes.ok) throw new Error(`Failed to fetch chapters: ${chaptersRes.status}`);
+      if (!courseRes.ok) {
+        const err = await courseRes.json().catch(() => ({}));
+        throw new Error(err.details || err.error || `Course fetch failed: ${courseRes.status}`);
+      }
+      if (!chaptersRes.ok) {
+        const err = await chaptersRes.json().catch(() => ({}));
+        throw new Error(err.details || err.error || `Chapters fetch failed: ${chaptersRes.status}`);
+      }
 
       const courseData = await courseRes.json();
       const chaptersData = await chaptersRes.json();

@@ -1,6 +1,6 @@
 // db.jsx
-import { db } from "./configs/db.server";
-import { Chapters } from "./configs/schema";
+import { db } from "./db.server";
+import { Chapters } from "./schema";
 
 // Insert a chapter
 export async function insertChapter(courseId, chapterData) {
