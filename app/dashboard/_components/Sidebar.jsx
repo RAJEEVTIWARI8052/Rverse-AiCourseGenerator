@@ -3,7 +3,7 @@
 import React, { useContext } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { FaHome, FaPowerOff } from "react-icons/fa";
+import { FaHome, FaHistory, FaPowerOff } from "react-icons/fa";
 import { BsStack } from "react-icons/bs";
 import { IoShieldCheckmark } from "react-icons/io5";
 import { UserButton } from "@clerk/nextjs";
@@ -27,6 +27,12 @@ function Sidebar({ closeSidebar }) {
             title: "Explore",
             icon: <BsStack />,
             path: "/dashboard/explore"
+        },
+        {
+            id: 5,
+            title: "History",
+            icon: <FaHistory />,
+            path: "/dashboard"
         },
         {
             id: 3,
