@@ -3,10 +3,19 @@ import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import { CourseList, Chapters } from "./schema";
 
-if (!process.env.NEXT_PUBLIC_DATABASE_URL)
-  throw new Error("DATABASE_URL not set");
+let dbUrl = process.env.NEXT_PUBLIC_DATABASE_URL;
 
-const sql = neon(process.env.NEXT_PUBLIC_DATABASE_URL);
+if (!dbUrl) {
+  console.error("❌ DATABASE_URL is missing in environment variables");
+  throw new Error("DATABASE_URL not set");
+}
+
+// Strip potential literal quotes if pasted incorrectly into Vercel/env
+dbUrl = dbUrl.replace(/^["']|["']$/g, '');
+
+console.log("🔍 DB: Initializing with URL (masked):", dbUrl.substring(0, 20) + "...");
+
+const sql = neon(dbUrl);
 export const db = drizzle(sql);
 
 // Insert course with fallback banner
