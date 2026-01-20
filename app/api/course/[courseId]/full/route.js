@@ -17,12 +17,22 @@ export async function GET(req, { params }) {
             return NextResponse.json({ error: "Course not found" }, { status: 404 });
         }
 
-        // Fetch chapters ordered by index
-        const chaptersRes = await db
-            .select()
-            .from(Chapters)
-            .where(eq(Chapters.courseId, courseId))
-            .orderBy(asc(Chapters.chapterIndex));
+        // Fetch chapters ordered by index (with fallback for missing column)
+        let chaptersRes;
+        try {
+            chaptersRes = await db
+                .select()
+                .from(Chapters)
+                .where(eq(Chapters.courseId, courseId))
+                .orderBy(asc(Chapters.chapterIndex));
+        } catch (dbError) {
+            console.warn("⚠️ API: chapterIndex missing, falling back to ID order.");
+            chaptersRes = await db
+                .select()
+                .from(Chapters)
+                .where(eq(Chapters.courseId, courseId))
+                .orderBy(asc(Chapters.id));
+        }
 
         let parsedOutput = JSON.parse(courseRes[0].courseOutput);
         const layoutChapters = parsedOutput.chapters || parsedOutput.Chapters || [];

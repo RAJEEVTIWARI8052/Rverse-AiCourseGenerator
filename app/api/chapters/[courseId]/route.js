@@ -16,16 +16,31 @@ export async function GET(req, { params }) {
     if (!courseId)
       return NextResponse.json({ error: "Course ID is required" }, { status: 400 });
 
-    const chapters = await db
-      .select()
-      .from(Chapters)
-      .where(eq(Chapters.courseId, courseId))
-      .orderBy(asc(Chapters.chapterIndex));
+    let chapters;
+    try {
+      // Try ordering by new chapterIndex column
+      chapters = await db
+        .select()
+        .from(Chapters)
+        .where(eq(Chapters.courseId, courseId))
+        .orderBy(asc(Chapters.chapterIndex));
+    } catch (dbError) {
+      console.warn("⚠️ API: chapterIndex column might be missing. Falling back to ID ordering.", dbError.message);
+      // Fallback to order by ID if column doesn't exist yet in DB
+      chapters = await db
+        .select()
+        .from(Chapters)
+        .where(eq(Chapters.courseId, courseId))
+        .orderBy(asc(Chapters.id));
+    }
 
     console.log("Fetched chapters:", chapters.length);
     return NextResponse.json(chapters);
   } catch (error) {
-    console.error("Error fetching chapters:", error);
-    return NextResponse.json({ error: "Failed to fetch chapters" }, { status: 500 });
+    console.error("❌ Fatal Error fetching chapters:", error);
+    return NextResponse.json({
+      error: "Failed to fetch chapters",
+      details: error.message
+    }, { status: 500 });
   }
 }
