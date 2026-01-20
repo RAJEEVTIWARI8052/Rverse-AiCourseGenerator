@@ -44,7 +44,7 @@ function EditCourseBasicInfo({ course, refreshData }) {
     };
 
     try {
-      const res = await fetch(`/api/course/${course.courseId}/update`, {
+      const res = await fetch(`/api/course/${course.courseId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         // ✅ send raw object (not stringified twice)

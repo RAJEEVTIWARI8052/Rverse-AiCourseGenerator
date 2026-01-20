@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 
 export async function GET(req, { params }) {
   try {
-    const { courseId } = params;
+    const { courseId } = await params;
     const userEmail = req.headers.get("x-user-email");
 
     console.log("API GET /chapters called for course:", courseId);

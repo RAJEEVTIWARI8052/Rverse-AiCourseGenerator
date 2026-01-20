@@ -3,7 +3,7 @@ import { AiOutlineClockCircle } from "react-icons/ai";
 
 function ChapterListCard({ chapter, index }) {
   console.log("🔍 DEBUG: ChapterListCard received:", chapter);
-  
+
   return (
     <div className="grid grid-cols-5 p-4 items-center gap-3 border-b">
       <div>
@@ -14,7 +14,7 @@ function ChapterListCard({ chapter, index }) {
       <div className="col-span-4">
         {/* ✅ FIXED: Handle both chapterName and chapterTitle */}
         <h2 className="font-medium">
-          {chapter?.chapterName || chapter?.chapterTitle || `Chapter ${index + 1}`}
+          {chapter?.chapterName || chapter?.ChapterName || chapter?.chapterTitle || `Chapter ${index + 1}`}
         </h2>
         <h2 className="flex items-center gap-2 text-sm text-blue-500">
           <AiOutlineClockCircle />

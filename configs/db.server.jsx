@@ -1,4 +1,5 @@
 import { neon } from "@neondatabase/serverless";
+// Force rebuild
 import { drizzle } from "drizzle-orm/neon-http";
 import { CourseList, Chapters } from "./schema";
 
@@ -13,7 +14,7 @@ export async function insertCourse(values) {
   try {
     if (!values.courseBanner) {
       values.courseBanner =
-        'https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=1200&q=80' ;
+        'https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=1200&q=80';
     }
 
     const [course] = await db.insert(CourseList).values(values).returning();

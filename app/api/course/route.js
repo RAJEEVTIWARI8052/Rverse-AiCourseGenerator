@@ -5,7 +5,7 @@ import { eq, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export async function GET(req, { params }) {
-  const { courseId } = params;
+  const { courseId } = await params;
 
   if (!courseId) {
     return NextResponse.json({ error: "Course ID required" }, { status: 400 });

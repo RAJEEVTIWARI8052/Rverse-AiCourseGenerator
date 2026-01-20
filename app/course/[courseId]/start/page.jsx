@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState, use } from "react";
-import { CourseList } from "../../../../configs/schema";
-import { eq } from "drizzle-orm";
+import { CourseList, Chapters } from "../../../../configs/schema";
+import { eq, and } from "drizzle-orm";
 import { db } from "../../../../configs/db.server";
 import ChapterListCard from "./_components/ChapterListCard";
 import ChapterContent from "./_components/ChapterContent";
@@ -18,42 +18,53 @@ function CourseStart({ params }) {
 
   const GetCourse = async () => {
     try {
-      console.log("🔍 DEBUG: Fetching course for ID:", courseId);
-      
+      console.log("🔍 DEBUG: Fetching course start info for ID:", courseId);
+
       const res = await db
         .select()
         .from(CourseList)
         .where(eq(CourseList.courseId, courseId));
 
-      console.log("🔍 DEBUG: Raw database result:", res);
+      const chaptersRes = await db
+        .select()
+        .from(Chapters)
+        .where(eq(Chapters.courseId, courseId))
+        .orderBy(Chapters.id); // 🔥 CRITICAL: Sort by ID to match generation order
+
+      console.log("🔍 DEBUG: Chapters fetched from DB:", chaptersRes.length);
 
       if (res.length > 0) {
-        console.log("🔍 DEBUG: Raw courseOutput:", res[0].courseOutput);
-        
-        let parsedOutput;
-        try {
-          parsedOutput = JSON.parse(res[0].courseOutput);
-          console.log("🔍 DEBUG: Parsed output:", parsedOutput);
-        } catch (parseError) {
-          console.error("❌ JSON Parse Error:", parseError);
-          console.log("❌ Invalid JSON:", res[0].courseOutput);
-          return;
-        }
+        let parsedOutput = JSON.parse(res[0].courseOutput);
+        const layoutChapters = parsedOutput.chapters || parsedOutput.Chapters || [];
+
+        // ✅ SOLUTION: Merge by index. This is the most reliable way 
+        // since we insert them into the DB in the same order as the layout.
+        const enrichedChapters = layoutChapters.map((chapter, index) => {
+          const dbChapter = chaptersRes[index];
+          if (dbChapter) {
+            console.log(`✅ Chapter ${index} matched. VideoId:`, dbChapter.videoId);
+            return {
+              ...chapter,
+              videoId: dbChapter.videoId
+            };
+          }
+          console.warn(`❌ No DB match for chapter index ${index}`);
+          return chapter;
+        });
+
+        // Update parsedOutput
+        if (parsedOutput.chapters) parsedOutput.chapters = enrichedChapters;
+        else if (parsedOutput.Chapters) parsedOutput.Chapters = enrichedChapters;
 
         setCourse(parsedOutput);
-        
-        // ✅ FIXED: Better initial chapter selection
-        if (parsedOutput.chapters && parsedOutput.chapters.length > 0) {
-          console.log("🔍 DEBUG: Setting first chapter:", parsedOutput.chapters[0]);
-          setSelectedChapter(parsedOutput.chapters[0]);
-        } else {
-          // If no subchapters, use the main chapter
-          console.log("🔍 DEBUG: No subchapters, using main chapter");
-          setSelectedChapter(parsedOutput);
+
+        if (enrichedChapters.length > 0) {
+          console.log("🔍 DEBUG: Selecting first enriched chapter with VideoId:", enrichedChapters[0].videoId);
+          setSelectedChapter(enrichedChapters[0]);
         }
       }
     } catch (error) {
-      console.error("❌ Error fetching course:", error);
+      console.error("❌ Error in GetCourse:", error);
     }
   };
 
@@ -65,15 +76,17 @@ function CourseStart({ params }) {
         </h2>
 
         <div>
-          {course?.chapters?.map((chapter, index) => (
+          {/* ✅ FIXED: Use enriched chapters with videoId */}
+          {(course?.chapters || course?.Chapters || []).map((chapter, index) => (
             <div
               key={index}
               className={`cursor-pointer hover:bg-blue-50 ${
                 // ✅ FIXED: Compare using chapterTitle instead of chapterName
-                selectedChapter?.chapterTitle === chapter?.chapterTitle
+                (selectedChapter?.chapterTitle || selectedChapter?.chapterName || selectedChapter?.ChapterName) ===
+                  (chapter?.chapterTitle || chapter?.chapterName || chapter?.ChapterName)
                   ? "bg-purple-100"
                   : ""
-              }`}
+                }`}
               onClick={() => {
                 console.log("🔍 DEBUG: Chapter clicked:", chapter);
                 setSelectedChapter(chapter);

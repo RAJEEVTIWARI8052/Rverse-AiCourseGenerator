@@ -1,5 +1,5 @@
 export async function POST(req, { params }) {
-  const { courseId } = params;
+  const { courseId } = await params;
   try {
     const deleted = await db.delete(Chapters).where(eq(Chapters.courseId, courseId));
     console.log(`Deleted ${deleted.length} chapters`);

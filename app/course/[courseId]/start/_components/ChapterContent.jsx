@@ -1,6 +1,7 @@
 import React from "react";
 import YouTube from "react-youtube";
 import ReactMarkdown from "react-markdown";
+import QuizCard from "./QuizCard";
 
 function ChapterContent({ chapter }) {
   const opts = {
@@ -16,23 +17,29 @@ function ChapterContent({ chapter }) {
   console.log("DEBUG: Fields:", chapter?.fields);
   console.log("DEBUG: Chapters:", chapter?.chapters);
 
-  if (!chapter) return <div className="p-10">Select a chapter</div>;
+  if (!chapter) {
+    return <div className="p-10">Select a chapter</div>;
+  }
+
+  // Debug rendering to find out what is missing
+  console.log("Final Chapter Props:", chapter);
 
   return (
     <div className="p-10">
       {/* Handle both chapterName and chapterTitle */}
       <h2 className="font-medium text-2xl">
-        {chapter?.chapterName || chapter?.chapterTitle || "Chapter"}
+        {chapter?.chapterName || chapter?.ChapterName || chapter?.chapterTitle || "Chapter"}
       </h2>
       <p className="text-gray-500">{chapter?.about}</p>
       <p className="text-sm text-blue-600 mb-4">Duration: {chapter?.duration}</p>
 
       {/* Main video - only show if videoId exists */}
+      {/* We check strictly for videoId */}
       {chapter?.videoId ? (
         <div className="flex justify-center my-6">
           <div className="border border-gray-300 rounded">
-            <YouTube 
-              videoId={chapter.videoId} 
+            <YouTube
+              videoId={chapter.videoId}
               opts={opts}
               onError={(error) => {
                 console.error("YouTube Error (Main):", error);
@@ -44,24 +51,26 @@ function ChapterContent({ chapter }) {
         </div>
       ) : (
         <div className="text-yellow-600 text-center my-6 p-4 bg-yellow-50 rounded">
-          No video available for this chapter. Generate course content to add videos.
+          {/* Debug info if missing */}
+          <p>No video available for this chapter.</p>
+          {/* <p className="text-xs mt-2 text-gray-400">Debug ID: {chapter?.id || 'null'}, Video: {chapter?.videoId || 'null'}</p> */}
         </div>
       )}
 
       {/* Handle different data structures - fields, details, or chapters */}
       <div>
         <h3 className="font-semibold text-xl mb-4">Chapter Content:</h3>
-        
+
         {/* Handle 'fields' array */}
         {chapter?.fields?.map((field, index) => {
           console.log(`DEBUG: Field ${index}:`, field);
-          
+
           return (
             <div key={index} className="p-5 bg-sky-50 mb-3 rounded-lg shadow-sm">
               <h2 className="font-medium text-lg">
                 {field?.fieldName || field?.name || `Section ${index + 1}`}
               </h2>
-              
+
               {field?.description && (
                 <div className="mt-2">
                   <ReactMarkdown>{field.description}</ReactMarkdown>
@@ -72,8 +81,8 @@ function ChapterContent({ chapter }) {
               {field?.videoId ? (
                 <div className="flex justify-center my-6">
                   <div className="border border-gray-300 rounded">
-                    <YouTube 
-                      videoId={field.videoId} 
+                    <YouTube
+                      videoId={field.videoId}
                       opts={opts}
                       onError={(error) => {
                         console.error(`YouTube Error (Field ${index}):`, error);
@@ -101,13 +110,13 @@ function ChapterContent({ chapter }) {
         {/* Handle 'details' array (fallback) */}
         {chapter?.details?.map((detail, index) => {
           console.log(`DEBUG: Detail ${index}:`, detail);
-          
+
           return (
             <div key={`detail-${index}`} className="p-5 bg-green-50 mb-3 rounded-lg shadow-sm">
               <h2 className="font-medium text-lg">
                 {detail?.fieldName || `Section ${index + 1}`}
               </h2>
-              
+
               {detail?.description && (
                 <div className="mt-2">
                   <ReactMarkdown>{detail.description}</ReactMarkdown>
@@ -138,13 +147,13 @@ function ChapterContent({ chapter }) {
         {/* Handle 'chapters' array (fallback) */}
         {chapter?.chapters?.map((subChapter, index) => {
           console.log(`DEBUG: Subchapter ${index}:`, subChapter);
-          
+
           return (
             <div key={`sub-${index}`} className="p-5 bg-purple-50 mb-3 rounded-lg shadow-sm">
               <h2 className="font-medium text-lg">
                 {subChapter?.chapterTitle || subChapter?.chapterName || `Section ${index + 1}`}
               </h2>
-              
+
               {subChapter?.description && (
                 <div className="mt-2">
                   <ReactMarkdown>{subChapter.description}</ReactMarkdown>
@@ -175,6 +184,9 @@ function ChapterContent({ chapter }) {
           </div>
         )}
       </div>
+
+      {/* Quiz Section */}
+      <QuizCard chapter={chapter} />
     </div>
   );
 }

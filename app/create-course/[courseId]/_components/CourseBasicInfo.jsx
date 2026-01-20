@@ -10,7 +10,7 @@ import Link from "next/link";
 function CourseBasicInfo({ course, refreshData }) {
   const [imageUrl, setImageUrl] = useState(
     course?.imageUrl ||
-      "https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=1200&q=80"
+    "https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=1200&q=80"
   );
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -47,7 +47,7 @@ function CourseBasicInfo({ course, refreshData }) {
         console.log("Uploaded to Cloudinary:", data.url);
 
         // Update DB with new image URL
-        await fetch(`/api/course/${course.courseId}/update`, {
+        await fetch(`/api/course/${course.courseId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -77,33 +77,41 @@ function CourseBasicInfo({ course, refreshData }) {
   const description = output?.description || output?.Description || "No description available";
 
   return (
-    <div className="p-10 border rounded-xl shadow-sm mt-5">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="p-8 glass rounded-2xl shadow-xl mt-6 border border-white/20 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl -z-10"></div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
         <div>
-          <h2 className="font-bold text-2xl flex items-center gap-2">
-            {output?.courseTitle}
+          <h2 className="font-extrabold text-3xl flex items-center gap-3">
+            <span className="gradient-text">{output?.courseTitle}</span>
             <EditCourseBasicInfo course={course} refreshData={() => refreshData(true)} />
           </h2>
 
-          <p className="text-xl text-gray-400 mt-3">{description}</p>
-          <h2 className="font-medium mt-2 flex gap-2 items-center bg-blue-500 text-white p-1 rounded">
-            <HiOutlinePuzzlePiece /> {output?.category}
-          </h2>
+          <p className="text-lg text-gray-500 dark:text-gray-300 mt-4 leading-relaxed">{description}</p>
 
-          <Link href={`/course/${course.courseId}/start`}>
-            <Button className="w-full mt-5">Start</Button>
+          <div className="mt-6 flex gap-3">
+            <h2 className="font-semibold flex gap-2 items-center bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 px-4 py-2 rounded-lg text-sm">
+              <HiOutlinePuzzlePiece className="text-xl" /> {output?.category}
+            </h2>
+          </div>
+
+          <Link href={`/course/${course.courseId}/start`} className="block mt-8">
+            <Button className="w-full md:w-auto px-10 py-6 text-lg shadow-2xl shadow-purple-500/20">Start Course</Button>
           </Link>
         </div>
 
-        <div>
-          <label htmlFor="upload-image" className="cursor-pointer">
+        <div className="relative group">
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity"></div>
+          <label htmlFor="upload-image" className="cursor-pointer relative block">
             <Image
               src={selectedFile ? selectedFile : imageUrl}
-              width={300}
+              width={400}
               height={300}
-              className="w-full rounded-xl h-[250px] object-cover"
+              className="w-full rounded-2xl h-[300px] object-cover shadow-lg transform group-hover:scale-[1.01] transition-transform duration-300"
               alt="Course image"
             />
+            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl flex items-center justify-center">
+              <span className="text-white font-medium bg-black/50 px-4 py-2 rounded-lg backdrop-blur-sm">Change Cover</span>
+            </div>
           </label>
 
           <Input
@@ -115,7 +123,7 @@ function CourseBasicInfo({ course, refreshData }) {
             disabled={uploading}
           />
 
-          {uploading && <p className="text-sm text-gray-500 mt-2">Uploading...</p>}
+          {uploading && <p className="text-sm text-purple-500 mt-2 font-medium animate-pulse text-center">Uploading new cover...</p>}
         </div>
       </div>
     </div>

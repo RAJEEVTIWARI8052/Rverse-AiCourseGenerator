@@ -7,7 +7,7 @@ import CourseDetail from "./_components/CourseDetail";
 import ChapterList from "./_components/ChapterList";
 import { Button } from "../../../components/button";
 import LoadingDialog from "../_components/LoadingDialog";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { generateChapterContent } from "../../../lib/groq";
 
 export default function CourseLayout({ params }) {
   const { courseId } = params;
@@ -67,7 +67,7 @@ export default function CourseLayout({ params }) {
       return;
     }
 
-    const chapters = output?.chapters || [];
+    const chapters = output?.chapters || output?.Chapters || [];
     if (chapters.length === 0) {
       setLoading(false);
       return;
@@ -76,22 +76,10 @@ export default function CourseLayout({ params }) {
     const results = [];
 
     try {
-      const ai = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY);
-      const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
-
       // Process chapters one at a time with delays
       for (let i = 0; i < chapters.length; i++) {
         const chapter = chapters[i];
         setCurrentChapter(i + 1);
-
-        const prompt = `
-Explain the concept in Detail on Topic: ${chapter.chapterName}.
-Generate the tutorial in JSON format. 
-Fields:
-- title
-- description (detailed explanation, at least 2–3 paragraphs)
-- codeExample (if applicable, wrap inside <precode>...</precode>)
-        `;
 
         let success = false;
         let attempts = 0;
@@ -100,13 +88,12 @@ Fields:
         while (!success && attempts < maxAttempts) {
           try {
             console.log(`Generating chapter ${i + 1}/${chapters.length} (attempt ${attempts + 1})`);
-            
-            const response = await model.generateContent(prompt);
-            const text = response.response.text();
+
+            const content = await generateChapterContent(chapter.chapterName);
 
             results.push({
               chapterName: chapter.chapterName,
-              generatedContent: text,
+              generatedContent: content,
             });
 
             success = true;
@@ -150,7 +137,7 @@ Fields:
     } catch (e) {
       console.error("Fatal error generating content:", e);
       setGenerationError(
-        "Failed to generate content. The Gemini API may be overloaded. Please try again in a few minutes."
+        "Failed to generate content. The Groq API may be overloaded. Please try again in a few minutes."
       );
     } finally {
       setLoading(false);
@@ -182,8 +169,8 @@ Fields:
       <CourseDetail course={course} />
       <ChapterList course={course} refreshData={fetchCourse} />
 
-      <Button 
-        onClick={GenerateChapterContent} 
+      <Button
+        onClick={GenerateChapterContent}
         className="my-10"
         disabled={loading}
       >
@@ -193,11 +180,10 @@ Fields:
       {generated.length > 0 && (
         <div className="mt-6 space-y-4">
           {generated.map((item, i) => (
-            <div 
-              key={i} 
-              className={`p-4 rounded-xl ${
-                item.error ? 'bg-red-50 border border-red-200' : 'bg-gray-100'
-              }`}
+            <div
+              key={i}
+              className={`p-4 rounded-xl ${item.error ? 'bg-red-50 border border-red-200' : 'bg-gray-100'
+                }`}
             >
               <h3 className="font-semibold mb-2">
                 Chapter: {item.chapterName || "Unknown"}

@@ -17,6 +17,8 @@ export const CourseList = pgTable("course_list", {
     "https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=1200&q=80"
   ),
   publish: boolean("publish").default(false),
+  Duration: varchar("duration").notNull().default("1 Hour"), // Added missing field with default
+  noOfChapters: varchar("noOfChapters").notNull().default("0"), // Added missing field with default
 });
 
 // Chapters table — supports multiple videos

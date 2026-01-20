@@ -75,62 +75,62 @@ function CourseCard({ course, refreshData, displayUser = false }) {
   };
 
   return (
-    <div className="shadow-sm rounded-lg flex flex-col gap-3 p-2 border hover:scale-105 transition-all cursor-pointer">
-      <Link href={`/create-course/${course.courseId}`} passHref>
-        <div>
-          <Image
-            loader={({ src }) => src}
-            src={bannerUrl}
-            width={300}
-            height={200}
-            className="w-full h-[200px] object-cover rounded-md"
-            alt={course?.name || "Course image"}
-          />
-        </div>
-      </Link>
-
-      <div className="p-2">
-        <h2 className="font-medium text-lg flex items-center justify-between">
-          <Link href={`/create-course/${course.courseId}`} className="flex-1 hover:text-blue-600">
-            {course?.name || "Untitled Course"}
-          </Link>
-          <DropDownoptions handleOnDelete={handleOnDelete}>
-            <IoEllipsisVerticalOutline />
-          </DropDownoptions>
-        </h2>
-        <p className="text-sm text-gray-400">
-          {course?.category || "Uncategorized"}
-        </p>
-      </div>
-
-      <Link href={`/create-course/${course.courseId}`} passHref>
-        <div className="flex gap-2 items-center justify-between">
-          <h2 className="flex gap-2 items-center p-1 bg-purple-50 text-blue-500 text-sm">
-            <IoBookOutline />
-            {numberOfChapters} Chapters
-          </h2>
-          <h2 className="text-sm bg-purple-50 text-blue-500 rounded-sm p-1">
-            {level}
-          </h2>
-        </div>
-      </Link>
-      <div className='flex gap-2 items-center mt-52'>
-        {course?.userProfileImage ? (
-          <Image
-            src={course.userProfileImage}
-            width={35}
-            height={35}
-            alt="User Profile"
-            className="rounded-full"
-          />
-        ) : (
-          <div className="w-[35px] h-[35px] bg-gray-300 rounded-full flex items-center justify-center">
-            <span className="text-gray-600 text-sm font-medium">
-              {course?.userName?.charAt(0)?.toUpperCase() || 'U'}
-            </span>
+    <div className="group hover:scale-105 transition-all duration-300 ease-in-out">
+      <div className="shadow-lg rounded-xl flex flex-col gap-3 p-3 glass border border-white/10 cursor-pointer h-full">
+        <Link href={`/create-course/${course.courseId}`} passHref>
+          <div className="relative h-[180px] w-full rounded-lg overflow-hidden">
+            <Image
+              loader={({ src }) => src}
+              src={bannerUrl}
+              fill
+              className="object-cover group-hover:scale-110 transition-transform duration-500"
+              alt={course?.name || "Course image"}
+            />
           </div>
-        )}
-        <h2 className='text-sm'>{course.userName}</h2>
+        </Link>
+
+        <div className="p-2 flex-col flex justify-between flex-1">
+          <div>
+            <h2 className="font-bold text-lg flex items-center justify-between mb-1">
+              <Link href={`/create-course/${course.courseId}`} className="line-clamp-1 hover:text-purple-500 transition-colors">
+                {course?.name || "Untitled Course"}
+              </Link>
+              <DropDownoptions handleOnDelete={handleOnDelete}>
+                <IoEllipsisVerticalOutline className="text-gray-500 hover:text-black dark:hover:text-white" />
+              </DropDownoptions>
+            </h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 bg-purple-50 dark:bg-purple-900/20 px-2 py-1 rounded w-fit">
+              {course?.category || "Uncategorized"}
+            </p>
+          </div>
+
+          <div className="mt-4 flex gap-2 items-center justify-between">
+            <h2 className="flex gap-1 items-center bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs px-2 py-1 rounded">
+              <IoBookOutline />
+              {numberOfChapters} Chapters
+            </h2>
+            <h2 className="text-xs bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded px-2 py-1">
+              {level}
+            </h2>
+          </div>
+
+          <div className='flex gap-2 items-center mt-3 border-t border-gray-100 dark:border-gray-800 pt-3'>
+            {course?.userProfileImage ? (
+              <Image
+                src={course.userProfileImage}
+                width={25}
+                height={25}
+                alt="User Profile"
+                className="rounded-full"
+              />
+            ) : (
+              <div className="w-[25px] h-[25px] bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white text-xs">
+                {course?.userName?.charAt(0)?.toUpperCase()}
+              </div>
+            )}
+            <h2 className='text-xs text-gray-500'>{course.userName}</h2>
+          </div>
+        </div>
       </div>
     </div>
   );

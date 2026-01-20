@@ -4,7 +4,7 @@
 import { insertCourse } from "../../../configs/db.server";
 import { v4 as uuidv4 } from "uuid";
 
-export async function saveCourseLayout(courseLayout, userCourseInput, userInfo) {
+export async function createCourseRecord(courseLayout, userCourseInput, userInfo) {
   try {
     const id = uuidv4();
 
@@ -16,7 +16,7 @@ export async function saveCourseLayout(courseLayout, userCourseInput, userInfo) 
       includeVideo: userCourseInput?.DisplayVideo || "Yes",
       Duration: userCourseInput?.Duration || "",
       noOfChapters: userCourseInput?.noOfChapters || 0,
-      courseOutput: courseLayout,
+      courseOutput: typeof courseLayout === "object" ? JSON.stringify(courseLayout) : courseLayout,
       createdBy: userInfo?.emailAddress || "unknown@system",
       userName: userInfo?.userName || "Anonymous",
       userProfileImage: userInfo?.userProfileImage || "",

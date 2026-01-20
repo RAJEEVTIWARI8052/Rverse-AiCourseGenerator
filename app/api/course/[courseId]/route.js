@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+// Rebuild trigger
 import { db } from "../../../../configs/db.server";
 import { CourseList } from "../../../../configs/schema";
 import { eq } from "drizzle-orm";
@@ -56,7 +57,7 @@ export async function DELETE(req, { params }) {
   try {
     // Await params before destructuring
     const { courseId } = await params;
-    
+
     const result = await db
       .delete(CourseList)
       .where(eq(CourseList.courseId, courseId))
@@ -66,9 +67,9 @@ export async function DELETE(req, { params }) {
       return NextResponse.json({ error: "Course not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       message: "Course deleted successfully",
-      deletedCourseId: result[0].courseId 
+      deletedCourseId: result[0].courseId
     });
   } catch (err) {
     console.error("Delete course error:", err);

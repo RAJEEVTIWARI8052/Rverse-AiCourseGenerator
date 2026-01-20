@@ -9,8 +9,8 @@ import SelectOptions from "./_components/SelectOptions"
 import UserInputContext from "../_context/UserInputContext"
 import LoadingDialog from "./_components/LoadingDialog"
 import { useUser } from "@clerk/nextjs"
-import { generateCourseLayout } from "../../lib/gemini"
-import { saveCourseLayout } from "./actions/saveCourse"
+import { generateCourseLayout } from "../../lib/groq"
+import { createCourseRecord } from "./actions/saveCourse"
 import { useRouter } from "next/navigation"
 import { IoEllipsisVerticalOutline } from "react-icons/io5"
 function CreateCoursePage() {
@@ -23,6 +23,7 @@ function CreateCoursePage() {
   const { userCourseInput, setUserCourseInput } = useContext(UserInputContext)
   const [activeIndex, setActiveIndex] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
   const { user, isLoaded } = useUser()
   const router = useRouter()
 
@@ -46,6 +47,9 @@ function CreateCoursePage() {
   const GenerateCourseLayout = async () => {
     if (!user) return
     setLoading(true)
+    setError(null) // Reset error
+
+    // ... (existing code)
 
     const userInfo = {
       emailAddress: user.primaryEmailAddress?.emailAddress || "anonymous",
@@ -54,13 +58,15 @@ function CreateCoursePage() {
     }
 
     const BASIC_PROMPT =
-      "Generate a Course Tutorial on Following Detail With Field Name, Description Along with Chapter Name, about, Duration:"
-    const USER_INPUT_PROMPT = `Category:${userCourseInput?.category}, Topic:${userCourseInput?.topic}, Level:${userCourseInput?.Level}, Duration:${userCourseInput?.Duration}, NoofChapters:${userCourseInput?.noOfChapters}, in JSON format`
+      "Generate a Course Tutorial. Output ONLY valid JSON with this structure: { \"courseTitle\": \"string\", \"chapters\": [{ \"chapterName\": \"string\", \"about\": \"string\", \"duration\": \"string\" }] }. Details:"
+    const USER_INPUT_PROMPT = `Category:${userCourseInput?.category}, Topic:${userCourseInput?.topic}, Level:${userCourseInput?.Level}, Duration:${userCourseInput?.Duration}, NoOfChapters:${userCourseInput?.noOfChapters}`
     const FINAL_PROMPT = BASIC_PROMPT + USER_INPUT_PROMPT
 
     try {
       const generatedText = await generateCourseLayout(FINAL_PROMPT)
-      if (!generatedText) return
+      if (!generatedText) {
+        throw new Error("No content generated");
+      }
 
       let courseLayout
       try {
@@ -68,19 +74,22 @@ function CreateCoursePage() {
         courseLayout = JSON.parse(cleanText)
       } catch (parseError) {
         console.error("Failed to parse JSON:", parseError)
-        return
+        throw new Error("Invalid AI response format");
       }
 
-      const newCourse = await saveCourseLayout(courseLayout, userCourseInput, userInfo)
+      const newCourse = await createCourseRecord(courseLayout, userCourseInput, userInfo)
 
-      // ✅ Redirect immediately, don’t show JSON on this page
       if (newCourse?.courseId) {
         router.replace(`/create-course/${newCourse.courseId}`)
       } else {
         console.error("Course ID missing from DB insert:", newCourse)
       }
+
+      // ... (existing code)
+
     } catch (err) {
       console.error("Error generating course:", err)
+      setError("Error generating course. Please try again, or check the console for details.")
     } finally {
       setLoading(false)
     }
@@ -93,23 +102,25 @@ function CreateCoursePage() {
     <div className="p-6">
       {/* Stepper */}
       <div className="flex flex-col items-center mb-10">
-        <h2 className="text-4xl text-purple-500 font-medium">Create Course</h2>
+        <h2 className="text-4xl font-bold gradient-text mb-4">Create Your Course</h2>
         <div className="flex justify-center p-4 gap-2">
           {StepperOptions.map((item, index) => (
             <div key={item.id} className="flex flex-col items-center flex-1 max-w-[100px] mb-2">
               <div
-                className={`text-white bg-gray-200 p-3 rounded-full ${
-                  activeIndex >= index ? "bg-purple-600" : ""
-                }`}
+                className={`flex items-center justify-center p-3 rounded-full transition-all duration-300 ${activeIndex >= index
+                  ? "bg-purple-600 text-white shadow-lg scale-110"
+                  : "bg-gray-200 dark:bg-gray-800 text-gray-500"
+                  }`}
               >
-                <item.icon />
+                <item.icon className="w-6 h-6" />
               </div>
-              <h2 className="hidden md:block md:text-sm text-gray-700">{item.name}</h2>
-              <div
-                className={`h-1 flex-1 rounded-full bg-gray-300 ${
-                  activeIndex - 1 >= index ? "bg-purple-600" : ""
-                }`}
-              ></div>
+              <h2 className="hidden md:block md:text-sm mt-2 font-medium text-gray-700 dark:text-gray-300">{item.name}</h2>
+              {index < StepperOptions.length - 1 && (
+                <div
+                  className={`h-1 flex-1 w-full rounded-full mt-2 transition-all duration-500 ${activeIndex > index ? "bg-purple-600" : "bg-gray-200 dark:bg-gray-700"
+                    }`}
+                ></div>
+              )}
             </div>
           ))}
         </div>
@@ -144,6 +155,14 @@ function CreateCoursePage() {
             </Button>
           )}
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-md flex items-center gap-2">
+            <HiLightBulb className="h-5 w-5" />
+            <span>{error}</span>
+          </div>
+        )}
       </div>
 
       <LoadingDialog loading={loading} />

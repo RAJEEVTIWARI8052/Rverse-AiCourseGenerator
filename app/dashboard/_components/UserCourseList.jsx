@@ -2,10 +2,7 @@
 
 import React, { useEffect, useState, useContext } from "react";
 import { useUser } from "@clerk/nextjs";
-import { eq, or } from "drizzle-orm";
-
-import { db } from "../../../configs/db.server";
-import { CourseList } from "../../../configs/schema";
+// Imports removed
 import CourseCard from "./CourseCard";
 import UserCourseListContext from "../../_context/UserCourseListContext";
 
@@ -22,25 +19,26 @@ function UserCourseList() {
 
   const fetchUserCourses = async () => {
     try {
-      const res = await db
-        .select()
-        .from(CourseList)
-        .where(
-          or(
-            eq(CourseList.createdBy, user?.id), // Clerk user ID
-            eq(CourseList.createdBy, user?.primaryEmailAddress?.emailAddress) // optional for old records
-          )
-        );
+      const response = await fetch("/api/courses", {
+        headers: {
+          "x-user-email": user?.primaryEmailAddress?.emailAddress,
+          "x-user-id": user?.id,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch courses");
+      }
+
+      const res = await response.json();
 
       // Update context
       setUserCourseList(res);
 
-      // Safely parse courseOutput JSON and handle missing banner
+      // Handle missing banner and type conversion
       const parsedCourses = res.map((c) => ({
         ...c,
-        courseOutput: c.courseOutput
-          ? JSON.parse(c.courseOutput)
-          : { course: { numberOfChapters: 0 } },
+        courseOutput: { course: { numberOfChapters: Number(c.noOfChapters) || 0 } }, // Mock structure for Card compatibility
         courseBanner: c.courseBanner || "https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=1200&q=80",
       }));
 
@@ -52,8 +50,8 @@ function UserCourseList() {
 
   return (
     <div className="mt-10">
-      <h2 className="mt-10 font-medium">My AI Courses</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+      <h2 className="text-2xl font-bold gradient-text mb-6">My AI Courses</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {courses.length > 0 ? (
           courses.map((course) => (
             <CourseCard

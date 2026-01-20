@@ -90,11 +90,11 @@ export default function FinishPage() {
       <div className="mt-10 space-y-8">
         {chapters.map((chapter, idx) => {
           let content = {};
-          
+
           console.log(`DEBUG: Raw chapter ${idx}:`, chapter);
           console.log(`DEBUG: Chapter ${idx} content type:`, typeof chapter.content);
           console.log(`DEBUG: Chapter ${idx} content:`, chapter.content);
-          
+
           try {
             // FIXED: Check if content is already an object or needs parsing
             if (typeof chapter.content === 'string') {
@@ -114,11 +114,11 @@ export default function FinishPage() {
           }
 
           // Handle both 'chapters' and 'details' arrays
-          const subChapters = Array.isArray(content.chapters) 
-            ? content.chapters 
-            : Array.isArray(content.details) 
-            ? content.details 
-            : [];
+          const subChapters = Array.isArray(content.chapters)
+            ? content.chapters
+            : Array.isArray(content.details)
+              ? content.details
+              : [];
 
           console.log(`DEBUG: Chapter ${idx} subchapters:`, subChapters);
 
@@ -131,23 +131,24 @@ export default function FinishPage() {
               <p className="text-gray-500 mb-4">{content.about}</p>
 
               {/* Main chapter video */}
-              {content.videoId ? (
+              {/* FIXED: videoId is at the top level chapter object, not nested in JSON content */}
+              {chapter.videoId ? (
                 <div className="flex justify-center mb-6">
                   <div className="border border-gray-300 rounded">
-                    <YouTube 
-                      videoId={content.videoId} 
+                    <YouTube
+                      videoId={chapter.videoId}
                       opts={opts}
                       onError={(error) => {
-                        console.error(`YouTube Error (Main Chapter ${idx}):`, error);
-                        console.log("Failed VideoId:", content.videoId);
+                        console.warn(`YouTube Warning (Main Chapter ${idx}):`, error);
+                        console.log(`Failed VideoId for chapter ${chapter.id}:`, chapter.videoId);
                       }}
-                      onReady={() => console.log(`YouTube Ready (Main Chapter ${idx}):`, content.videoId)}
+                      onReady={() => console.log(`YouTube Ready (Main Chapter ${idx}):`, chapter.videoId)}
                     />
                   </div>
                 </div>
               ) : (
                 <div className="text-yellow-600 text-center mb-6 p-4 bg-yellow-50 rounded">
-                  No main video available for this chapter
+                  No main video available for this chapter (Debug ID: {chapter.id || 'none'})
                 </div>
               )}
 
@@ -171,12 +172,12 @@ export default function FinishPage() {
                   {item.videoId ? (
                     <div className="flex justify-center mt-3">
                       <div className="border border-gray-300 rounded">
-                        <YouTube 
-                          videoId={item.videoId} 
+                        <YouTube
+                          videoId={item.videoId}
                           opts={opts}
                           onError={(error) => {
-                            console.error(`YouTube Error (Sub ${idx}-${i}):`, error);
-                            console.log("Failed VideoId:", item.videoId);
+                            console.warn(`YouTube Warning (Sub ${idx}-${i}):`, error);
+                            // console.log("Failed VideoId:", item.videoId);
                           }}
                           onReady={() => console.log(`YouTube Ready (Sub ${idx}-${i}):`, item.videoId)}
                         />
