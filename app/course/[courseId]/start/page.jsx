@@ -1,8 +1,5 @@
 "use client";
 import React, { useEffect, useState, use } from "react";
-import { CourseList, Chapters } from "../../../../configs/schema";
-import { eq, and } from "drizzle-orm";
-import { db } from "../../../../configs/db.server";
 import ChapterListCard from "./_components/ChapterListCard";
 import ChapterContent from "./_components/ChapterContent";
 
@@ -14,50 +11,19 @@ function CourseStart({ params }) {
 
   const GetCourse = React.useCallback(async () => {
     try {
-      console.log("🔍 DEBUG: Fetching course start info for ID:", courseId);
+      console.log("🔍 DEBUG: Fetching full course info via API for ID:", courseId);
 
-      const res = await db
-        .select()
-        .from(CourseList)
-        .where(eq(CourseList.courseId, courseId));
+      const response = await fetch(`/api/course/${courseId}/full`);
+      if (!response.ok) throw new Error("Failed to fetch course data");
 
-      const chaptersRes = await db
-        .select()
-        .from(Chapters)
-        .where(eq(Chapters.courseId, courseId))
-        .orderBy(Chapters.id); // 🔥 CRITICAL: Sort by ID to match generation order
+      const parsedOutput = await response.json();
+      const enrichedChapters = parsedOutput.chapters || parsedOutput.Chapters || [];
 
-      console.log("🔍 DEBUG: Chapters fetched from DB:", chaptersRes.length);
+      setCourse(parsedOutput);
 
-      if (res.length > 0) {
-        let parsedOutput = JSON.parse(res[0].courseOutput);
-        const layoutChapters = parsedOutput.chapters || parsedOutput.Chapters || [];
-
-        // ✅ SOLUTION: Merge by index. This is the most reliable way 
-        // since we insert them into the DB in the same order as the layout.
-        const enrichedChapters = layoutChapters.map((chapter, index) => {
-          const dbChapter = chaptersRes[index];
-          if (dbChapter) {
-            console.log(`✅ Chapter ${index} matched. VideoId:`, dbChapter.videoId);
-            return {
-              ...chapter,
-              videoId: dbChapter.videoId
-            };
-          }
-          console.warn(`❌ No DB match for chapter index ${index}`);
-          return chapter;
-        });
-
-        // Update parsedOutput
-        if (parsedOutput.chapters) parsedOutput.chapters = enrichedChapters;
-        else if (parsedOutput.Chapters) parsedOutput.Chapters = enrichedChapters;
-
-        setCourse(parsedOutput);
-
-        if (enrichedChapters.length > 0) {
-          console.log("🔍 DEBUG: Selecting first enriched chapter with VideoId:", enrichedChapters[0].videoId);
-          setSelectedChapter(enrichedChapters[0]);
-        }
+      if (enrichedChapters.length > 0) {
+        console.log("🔍 DEBUG: Selecting first enriched chapter");
+        setSelectedChapter(enrichedChapters[0]);
       }
     } catch (error) {
       console.error("❌ Error in GetCourse:", error);
@@ -76,13 +42,10 @@ function CourseStart({ params }) {
         </h2>
 
         <div>
-          {/* ✅ FIXED: Use enriched chapters with videoId */}
           {(course?.chapters || course?.Chapters || []).map((chapter, index) => (
             <div
               key={index}
-              className={`cursor-pointer hover:bg-blue-50 ${
-                // ✅ FIXED: Compare using chapterTitle instead of chapterName
-                (selectedChapter?.chapterTitle || selectedChapter?.chapterName || selectedChapter?.ChapterName) ===
+              className={`cursor-pointer hover:bg-blue-50 ${(selectedChapter?.chapterTitle || selectedChapter?.chapterName || selectedChapter?.ChapterName) ===
                   (chapter?.chapterTitle || chapter?.chapterName || chapter?.ChapterName)
                   ? "bg-purple-100"
                   : ""

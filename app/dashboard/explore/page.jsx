@@ -1,26 +1,24 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { db } from "../../../configs/db.server";
-import { CourseList } from "../../../configs/schema";
 import CourseCard from "../_components/CourseCard";
-import { Button } from "../../../components/button"; // ✅ assuming shadcn button
+import { Button } from "../../../components/button";
 
 function Explore() {
   const [courseList, setCourseList] = useState([]);
   const [pageIndex, setPageIndex] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const GetAllCourse = React.useCallback(async () => {
+    setLoading(true);
     try {
-      const res = await db
-        .select()
-        .from(CourseList)
-        .limit(9)
-        .offset(pageIndex * 9);
-
+      const response = await fetch(`/api/courses/explore?pageIndex=${pageIndex}`);
+      if (!response.ok) throw new Error("Failed to fetch courses");
+      const res = await response.json();
       setCourseList(res);
-      console.log("Fetched courses:", res);
     } catch (error) {
       console.error("Error fetching courses:", error);
+    } finally {
+      setLoading(false);
     }
   }, [pageIndex]);
 
@@ -43,9 +41,9 @@ function Explore() {
 
       <div className="flex justify-between mt-5">
         {pageIndex !== 0 && (
-          <Button onClick={() => setPageIndex((prev) => prev - 1)}>Prev Page</Button>
+          <Button onClick={() => setPageIndex((prev) => prev - 1)} disabled={loading}>Prev Page</Button>
         )}
-        <Button onClick={() => setPageIndex((prev) => prev + 1)}>Next Page</Button>
+        <Button onClick={() => setPageIndex((prev) => prev + 1)} disabled={loading}>Next Page</Button>
       </div>
     </div>
   );
