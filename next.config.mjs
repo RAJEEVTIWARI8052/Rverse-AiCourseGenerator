@@ -6,7 +6,7 @@ const nextConfig = {
       "via.placeholder.com",   // Placeholder
       "res.cloudinary.com",
       "img.clerk.com",
-
+      "img.icons8.com",
     ],
   },
   experimental: {

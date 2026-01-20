@@ -33,18 +33,25 @@ export async function POST(req, { params }) {
 
       try {
         // 1. Generate Detailed AI Content (Text/Code)
+        console.log(`🔍 DEBUG: Generation started for ${chapterTitle}`);
         const aiResponse = await generateChapterContent(chapterTitle);
         try {
           detailedContent = JSON.parse(aiResponse);
+          console.log(`✅ DEBUG: AI Content generated for ${chapterTitle}`);
         } catch (pErr) {
           console.error(`❌ JSON Parse failed for ${chapterTitle}:`, pErr);
+          console.log("Raw AI Response:", aiResponse);
         }
 
         // 2. Get Video from YouTube
-        const query = chapterTitle + " " + (courseData.category || "");
+        const query = (chapter.chapterName || chapter.chapterTitle || chapter.name) + " " + (courseData.category || "");
+        console.log(`🔍 DEBUG: YouTube Search query: "${query}"`);
         const videos = await getVideos(query);
         if (videos && videos.length > 0) {
           videoId = videos[0].id.videoId;
+          console.log(`✅ DEBUG: Video found for ${chapterTitle}: ${videoId}`);
+        } else {
+          console.warn(`⚠️ DEBUG: No video found for ${chapterTitle}`);
         }
 
       } catch (e) {
