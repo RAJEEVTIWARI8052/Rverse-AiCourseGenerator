@@ -51,7 +51,7 @@ export default function FinishPage() {
 
   useEffect(() => {
     if (isLoaded && user && courseId) fetchCourseData();
-  }, [isLoaded, user, courseId]);
+  }, [isLoaded, user, courseId, fetchCourseData]);
 
   if (!isLoaded) return <p>Loading user info...</p>;
   if (!user) return <p>Please sign in to view course.</p>;

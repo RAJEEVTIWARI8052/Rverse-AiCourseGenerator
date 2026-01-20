@@ -33,7 +33,7 @@ function EditChapters({ course, index, refreshData }) {
   useEffect(() => {
     setName(chapter.chapterName || "");
     setAbout(chapter.about || "");
-  }, [course, index]);
+  }, [course, index, chapter.chapterName, chapter.about]);
 
   const onUpdateHandler = async () => {
     try {
@@ -72,7 +72,7 @@ function EditChapters({ course, index, refreshData }) {
         <DialogHeader>
           <DialogTitle>Edit Chapter Title & Description</DialogTitle>
           <DialogDescription>
-            Update the details below and click "Update" to save your changes.
+            Update the details below and click &quot;Update&quot; to save your changes.
           </DialogDescription>
         </DialogHeader>
 

@@ -1,6 +1,7 @@
 "use client";
 import { SignUp } from '@clerk/nextjs';
 import { useEffect } from 'react';
+import Link from 'next/link';
 
 export default function Page() {
   useEffect(() => {
@@ -24,9 +25,9 @@ export default function Page() {
         />
         <p className="text-sm text-center text-gray-500 mt-4">
           Already have an account?{' '}
-          <a href="/sign-in" className="text-purple-600">
+          <Link href="/sign-in" className="text-purple-600">
             Sign In
-          </a>
+          </Link>
         </p>
       </div>
     </div>

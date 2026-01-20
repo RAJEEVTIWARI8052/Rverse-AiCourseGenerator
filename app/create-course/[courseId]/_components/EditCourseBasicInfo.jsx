@@ -34,7 +34,7 @@ function EditCourseBasicInfo({ course, refreshData }) {
   useEffect(() => {
     setName(parsedOutput?.courseTitle || "");
     setDescription(parsedOutput?.description || parsedOutput?.Description || "");
-  }, [course]);
+  }, [course, parsedOutput?.courseTitle, parsedOutput?.description, parsedOutput?.Description]);
 
   const onUpdateHandler = async () => {
     const updatedOutput = {
@@ -73,7 +73,7 @@ function EditCourseBasicInfo({ course, refreshData }) {
         <DialogHeader>
           <DialogTitle>Edit Course Title & Description</DialogTitle>
           <DialogDescription>
-            Update the course details below and click "Update" to save changes.
+            Update the course details below and click &quot;Update&quot; to save changes.
           </DialogDescription>
         </DialogHeader>
 

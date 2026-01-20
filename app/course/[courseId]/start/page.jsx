@@ -14,7 +14,7 @@ function CourseStart({ params }) {
 
   useEffect(() => {
     GetCourse();
-  }, []);
+  }, [GetCourse]);
 
   const GetCourse = async () => {
     try {
