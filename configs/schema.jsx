@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, text, boolean, json } from "drizzle-orm/pg-core";
+import { pgTable, serial, varchar, text, boolean, json, integer } from "drizzle-orm/pg-core";
 
 // Courses table
 export const CourseList = pgTable("course_list", {
@@ -28,4 +28,5 @@ export const Chapters = pgTable("chapters", {
   content: json("content").notNull(),    // store AI generated JSON content
   userName: varchar("userName").notNull(),
   videoId: varchar("videoId").default(null),
+  chapterIndex: integer("chapterIndex").default(0),
 });

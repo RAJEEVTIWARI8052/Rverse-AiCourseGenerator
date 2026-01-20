@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";      // <-- Needed for response
 import { db } from "../../../../configs/db.server"; // <-- Needed to access your DB
 import { Chapters } from "../../../../configs/schema";
-import { eq } from "drizzle-orm";
+import { eq, asc } from "drizzle-orm";
 
 export async function GET(req, { params }) {
   try {
@@ -19,7 +19,8 @@ export async function GET(req, { params }) {
     const chapters = await db
       .select()
       .from(Chapters)
-      .where(eq(Chapters.courseId, courseId));
+      .where(eq(Chapters.courseId, courseId))
+      .orderBy(asc(Chapters.chapterIndex));
 
     console.log("Fetched chapters:", chapters.length);
     return NextResponse.json(chapters);

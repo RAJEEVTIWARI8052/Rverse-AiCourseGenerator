@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "../../../../../configs/db.server";
 import { CourseList, Chapters } from "../../../../../configs/schema";
-import { eq } from "drizzle-orm";
+import { eq, asc } from "drizzle-orm";
 
 export async function GET(req, { params }) {
     try {
@@ -17,19 +17,21 @@ export async function GET(req, { params }) {
             return NextResponse.json({ error: "Course not found" }, { status: 404 });
         }
 
-        // Fetch chapters
+        // Fetch chapters ordered by index
         const chaptersRes = await db
             .select()
             .from(Chapters)
             .where(eq(Chapters.courseId, courseId))
-            .orderBy(Chapters.id);
+            .orderBy(asc(Chapters.chapterIndex));
 
         let parsedOutput = JSON.parse(courseRes[0].courseOutput);
         const layoutChapters = parsedOutput.chapters || parsedOutput.Chapters || [];
 
-        // Merge logic on the server
+        // Merge logic using chapterIndex for robustness
         const enrichedChapters = layoutChapters.map((chapter, index) => {
-            const dbChapter = chaptersRes[index];
+            // Find the database record that matches this layout index
+            const dbChapter = chaptersRes.find(c => c.chapterIndex === index) || chaptersRes[index];
+
             if (dbChapter) {
                 console.log(`🔍 API: Merging DB content for chapter ${index}. VideoId: ${dbChapter.videoId}`);
 

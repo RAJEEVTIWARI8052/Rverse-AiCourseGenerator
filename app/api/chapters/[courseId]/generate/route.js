@@ -23,10 +23,11 @@ export async function POST(req, { params }) {
 
     const chapters = courseData.chapters || courseData.Chapters || [];
 
-    // Process each chapter
-    for (const chapter of chapters) {
-      const chapterTitle = chapter.chapterName || chapter.ChapterName || chapter.name || "AI Course";
-      console.log(`🚀 DEBUG: Generating full content for chapter: ${chapterTitle}`);
+    // Process each chapter with explicit index for deterministic ordering
+    for (let i = 0; i < chapters.length; i++) {
+      const chapter = chapters[i];
+      const chapterTitle = chapter.chapterName || chapter.ChapterName || chapter.name || "AI Chapter";
+      console.log(`🚀 DEBUG: Generating full content for chapter ${i}: ${chapterTitle}`);
 
       let videoId = null;
       let detailedContent = {};
@@ -60,18 +61,20 @@ export async function POST(req, { params }) {
 
       // Merge layout data with AI-generated detailed content
       const mergedContent = {
-        ...chapter,
-        ...detailedContent
+        ...chapter,      // original layout info (title, about, duration)
+        ...detailedContent // detailed content (fields, etc.)
       };
 
-      // Save chapter to DB
+      // Save chapter to DB with explicit order index
       await db.insert(Chapters).values({
         courseId: courseId,
         content: JSON.stringify(mergedContent),
         videoId: videoId,
-        userName: course[0].userName
+        userName: course[0].userName,
+        chapterIndex: i
       });
     }
+
 
     // Mark course as published
     await db.update(CourseList).set({ publish: true }).where(eq(CourseList.courseId, courseId));
