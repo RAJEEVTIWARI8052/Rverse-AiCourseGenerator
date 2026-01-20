@@ -30,6 +30,7 @@
     "drizzle-orm": "^0.33.0",
     "firebase": "^12.2.1",
     "geist": "^1.5.1",
+    "groq-sdk": "^0.37.0",
     "lucide-react": "^0.542.0",
     "next": "15.5.4",
     "react": "^19.1.1",

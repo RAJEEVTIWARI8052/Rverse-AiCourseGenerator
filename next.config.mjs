@@ -4,10 +4,14 @@ const nextConfig = {
     domains: [
       "images.unsplash.com",   // Unsplash
       "via.placeholder.com",   // Placeholder
-      "res.cloudinary.com" ,
+      "res.cloudinary.com",
       "img.clerk.com",
 
     ],
+  },
+  experimental: {
+    // Helps Vercel correctly identify the project root when multiple lockfiles are detected
+    outputFileTracingRoot: process.cwd(),
   },
 };
 
