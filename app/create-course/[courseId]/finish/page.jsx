@@ -16,7 +16,7 @@ export default function FinishPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchCourseData = async () => {
+  const fetchCourseData = React.useCallback(async () => {
     if (!user?.primaryEmailAddress?.emailAddress || !courseId) return;
     try {
       setLoading(true);
@@ -47,7 +47,7 @@ export default function FinishPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, courseId]);
 
   useEffect(() => {
     if (isLoaded && user && courseId) fetchCourseData();

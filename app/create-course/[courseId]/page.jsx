@@ -48,8 +48,8 @@ export default function CourseLayout({ params }) {
   if (!course) return <p>Loading course...</p>;
 
   // Fix: Use a valid default image URL
-  const bannerUrl = course.courseBanner && course.courseBanner !== "https://via.placeholder.com/300x200.png?text=Course+Image" 
-    ? course.courseBanner 
+  const bannerUrl = course.courseBanner && course.courseBanner !== "https://via.placeholder.com/300x200.png?text=Course+Image"
+    ? course.courseBanner
     : "https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=1200&q=80";
 
   // Generate chapters (example, can connect AI API)
@@ -57,13 +57,17 @@ export default function CourseLayout({ params }) {
     setLoading(true);
     try {
       const res = await fetch(`/api/chapters/${courseId}/generate`, { method: "POST" });
+      if (!res.ok) {
+        throw new Error(`Generation failed with status ${res.status}`);
+      }
+
       const data = await res.json();
       console.log("Generate chapters response:", data);
 
       router.push(`/create-course/${courseId}/finish`);
     } catch (err) {
       console.error(err);
-      alert("Failed to generate chapters");
+      alert("Failed to generate chapters: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -72,14 +76,14 @@ export default function CourseLayout({ params }) {
   return (
     <div className="mt-10 px-7 md:px-20 lg:px-44">
       <h2 className="font-bold text-center text-2xl">Course Layout</h2>
-      
+
       {/* Fix: Use Next.js Image component instead of img tag */}
-      <Image 
-        src={bannerUrl} 
-        alt="Course Banner" 
+      <Image
+        src={bannerUrl}
+        alt="Course Banner"
         width={1200}
         height={240}
-        className="w-full h-60 object-cover my-5 rounded-lg" 
+        className="w-full h-60 object-cover my-5 rounded-lg"
         priority
       />
 
@@ -89,8 +93,8 @@ export default function CourseLayout({ params }) {
       <CourseDetail course={course} />
       <ChapterList course={course} refreshData={fetchCourse} />
 
-      <Button onClick={generateChapters} className="my-10">
-        Generate Course Content
+      <Button onClick={generateChapters} className="my-10" disabled={loading}>
+        {loading ? "Generating..." : "Generate Course Content"}
       </Button>
     </div>
   );
