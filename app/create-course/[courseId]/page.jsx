@@ -23,7 +23,7 @@ export default function CourseLayout({ params }) {
   const [loading, setLoading] = useState(false);
 
   // Fetch course details
-  const fetchCourse = async () => {
+  const fetchCourse = React.useCallback(async () => {
     if (!user?.primaryEmailAddress?.emailAddress) return;
     try {
       const res = await fetch(`/api/course/${courseId}`, {
@@ -36,11 +36,11 @@ export default function CourseLayout({ params }) {
       setError(err.message);
       console.error("Fetch error:", err);
     }
-  };
+  }, [user, courseId]);
 
   useEffect(() => {
     if (isLoaded && user && courseId) fetchCourse();
-  }, [isLoaded, user, courseId]);
+  }, [isLoaded, user, courseId, fetchCourse]);
 
   if (!isLoaded) return <p>Loading user info...</p>;
   if (!user) return <p>Please sign in to view course.</p>;

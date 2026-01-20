@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
 import { SignIn } from "@clerk/nextjs";
+import Image from "next/image";
+
 export default function Page() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,10 +18,12 @@ export default function Page() {
       <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-md">
         {/* Logo */}
         <div className="flex justify-center mb-6">
-          <img
+          <Image
             src="https://images.unsplash.com/photo-1593642532973-d31b6557fa68?auto=format&fit=crop&w=100&q=80"
             alt="Logo"
-            className="rounded-full w-24 h-24"
+            width={96}
+            height={96}
+            className="rounded-full"
           />
         </div>
 
@@ -34,7 +38,7 @@ export default function Page() {
               headerSubtitle: "hidden"
             }
           }}
-          
+
         />
 
         <p className="text-sm text-center text-gray-500 mt-4">

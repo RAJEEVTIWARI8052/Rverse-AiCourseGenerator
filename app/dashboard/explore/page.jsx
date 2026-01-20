@@ -9,7 +9,7 @@ function Explore() {
   const [courseList, setCourseList] = useState([]);
   const [pageIndex, setPageIndex] = useState(0);
 
-  const GetAllCourse = async () => {
+  const GetAllCourse = React.useCallback(async () => {
     try {
       const res = await db
         .select()
@@ -22,11 +22,11 @@ function Explore() {
     } catch (error) {
       console.error("Error fetching courses:", error);
     }
-  };
+  }, [pageIndex]);
 
   useEffect(() => {
     GetAllCourse();
-  }, [pageIndex]); // ✅ refresh data when pageIndex changes
+  }, [GetAllCourse]);
 
   return (
     <div>

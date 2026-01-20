@@ -11,13 +11,7 @@ function UserCourseList() {
   const [courses, setCourses] = useState([]);
   const { setUserCourseList } = useContext(UserCourseListContext);
 
-  useEffect(() => {
-    if (user) {
-      fetchUserCourses();
-    }
-  }, [user]);
-
-  const fetchUserCourses = async () => {
+  const fetchUserCourses = React.useCallback(async () => {
     try {
       const response = await fetch("/api/courses", {
         headers: {
@@ -46,7 +40,13 @@ function UserCourseList() {
     } catch (err) {
       console.error("Error fetching courses:", err);
     }
-  };
+  }, [user, setUserCourseList]);
+
+  useEffect(() => {
+    if (user) {
+      fetchUserCourses();
+    }
+  }, [user, fetchUserCourses]);
 
   return (
     <div className="mt-10">

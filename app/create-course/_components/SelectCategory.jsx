@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import CategoryList from "../../_shared/CategoryList";
 import UserInputContext from "../../_context/UserInputContext";
+import Image from "next/image";
 
 
 function SelectCategory() {
@@ -24,7 +25,7 @@ function SelectCategory() {
               }`}
             onClick={() => handleCategoryChange(item.name)}
           >
-            <img
+            <Image
               src={item.icon}
               alt={item.name}
               width={50}
