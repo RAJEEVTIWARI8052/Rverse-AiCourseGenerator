@@ -1,15 +1,29 @@
 import React from 'react'
 import { Button } from '../../components/button'
 import Link from 'next/link'
+import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs'
 
 function Header() {
   return (
     <div className="flex justify-between items-center p-5 shadow-sm border-b border-white/10 glass sticky top-0 z-50">
-      <h1 className="text-xl md:text-2xl font-bold gradient-text">Rverse AI</h1>
+      <Link href="/">
+        <h1 className="text-xl md:text-2xl font-bold gradient-text cursor-pointer">Rverse AI</h1>
+      </Link>
       <div className='flex gap-4 items-center'>
-        <Link href="/dashboard">
-          <Button>Get Started</Button>
-        </Link>
+        <SignedOut>
+          <SignInButton mode="modal">
+            <Button variant="ghost">Sign In</Button>
+          </SignInButton>
+          <SignUpButton mode="modal">
+            <Button>Sign Up</Button>
+          </SignUpButton>
+        </SignedOut>
+        <SignedIn>
+          <Link href="/dashboard">
+            <Button variant="ghost">Dashboard</Button>
+          </Link>
+          <UserButton afterSignOutUrl="/" />
+        </SignedIn>
       </div>
     </div>
   )
