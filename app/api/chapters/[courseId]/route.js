@@ -18,23 +18,27 @@ export async function GET(req, { params }) {
 
     let chapters;
     try {
-      // Try ordering by new chapterIndex column
+      console.log("🔍 API: Executing select query...");
       chapters = await db
         .select()
         .from(Chapters)
-        .where(eq(Chapters.courseId, courseId))
-        .orderBy(asc(Chapters.chapterIndex));
+        .where(eq(Chapters.courseId, courseId));
+
+      console.log(`✅ API: Found ${chapters.length} chapters raw`);
+
+      // Manual sort based on index if available
+      chapters.sort((a, b) => {
+        const indexA = a.chapterIndex ?? 0;
+        const indexB = b.chapterIndex ?? 0;
+        return indexA - indexB;
+      });
+
     } catch (dbError) {
-      console.warn("⚠️ API: chapterIndex column might be missing. Falling back to ID ordering.", dbError.message);
-      // Fallback to order by ID if column doesn't exist yet in DB
-      chapters = await db
-        .select()
-        .from(Chapters)
-        .where(eq(Chapters.courseId, courseId))
-        .orderBy(asc(Chapters.id));
+      console.error("❌ API: DB Query error:", dbError);
+      throw dbError;
     }
 
-    console.log("Fetched chapters:", chapters.length);
+    console.log("🚀 API: Final sorted chapters count:", chapters.length);
     return NextResponse.json(chapters);
   } catch (error) {
     console.error("❌ Fatal Error fetching chapters:", error);
