@@ -12,11 +12,7 @@ function CourseStart({ params }) {
   const [course, setCourse] = useState();
   const [selectedChapter, setSelectedChapter] = useState();
 
-  useEffect(() => {
-    GetCourse();
-  }, [GetCourse]);
-
-  const GetCourse = async () => {
+  const GetCourse = React.useCallback(async () => {
     try {
       console.log("🔍 DEBUG: Fetching course start info for ID:", courseId);
 
@@ -66,7 +62,11 @@ function CourseStart({ params }) {
     } catch (error) {
       console.error("❌ Error in GetCourse:", error);
     }
-  };
+  }, [courseId]);
+
+  useEffect(() => {
+    GetCourse();
+  }, [GetCourse]);
 
   return (
     <div className="flex">
