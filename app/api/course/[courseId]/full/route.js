@@ -31,12 +31,21 @@ export async function GET(req, { params }) {
         const enrichedChapters = layoutChapters.map((chapter, index) => {
             const dbChapter = chaptersRes[index];
             if (dbChapter) {
+                console.log(`🔍 API: Merging DB content for chapter ${index}. VideoId: ${dbChapter.videoId}`);
+
+                // dbChapter.content is a JSON object stored in the DB
+                const content = typeof dbChapter.content === 'string'
+                    ? JSON.parse(dbChapter.content)
+                    : dbChapter.content;
+
                 return {
-                    ...chapter,
-                    videoId: dbChapter.videoId
-                    // Note: If you want to include full chapter content, do it here
+                    ...chapter,      // original layout info (title, about, duration)
+                    ...content,      // detailed content (fields, etc.)
+                    videoId: dbChapter.videoId || chapter.videoId || null,
+                    id: dbChapter.id
                 };
             }
+            console.warn(`⚠️ API: No DB match for chapter index ${index}`);
             return chapter;
         });
 
