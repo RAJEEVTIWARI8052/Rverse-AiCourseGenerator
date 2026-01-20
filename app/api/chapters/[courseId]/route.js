@@ -26,11 +26,12 @@ export async function GET(req, { params }) {
 
       console.log(`✅ API: Found ${chapters.length} chapters raw`);
 
-      // Manual sort based on index if available
+      // Manual sort: chapterIndex first, then id as fallback for older courses
       chapters.sort((a, b) => {
-        const indexA = a.chapterIndex ?? 0;
-        const indexB = b.chapterIndex ?? 0;
-        return indexA - indexB;
+        if (a.chapterIndex !== b.chapterIndex) {
+          return (a.chapterIndex ?? 0) - (b.chapterIndex ?? 0);
+        }
+        return a.id - b.id; // Deterministic fallback
       });
 
     } catch (dbError) {

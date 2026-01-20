@@ -17,14 +17,14 @@ export async function GET(req, { params }) {
             return NextResponse.json({ error: "Course not found" }, { status: 404 });
         }
 
-        // Fetch chapters ordered by index (with fallback for missing column)
+        // Fetch chapters ordered by index then id for legacy compatibility
         let chaptersRes;
         try {
             chaptersRes = await db
                 .select()
                 .from(Chapters)
                 .where(eq(Chapters.courseId, courseId))
-                .orderBy(asc(Chapters.chapterIndex));
+                .orderBy(asc(Chapters.chapterIndex), asc(Chapters.id));
         } catch (dbError) {
             console.warn("⚠️ API: chapterIndex missing, falling back to ID order.");
             chaptersRes = await db
