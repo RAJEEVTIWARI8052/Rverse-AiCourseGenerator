@@ -46,22 +46,82 @@ export const getVideos = async (query) => {
     return resp.data.items;
   } catch (err) {
     console.error("❌ YouTube API Error:", err);
-    console.error("❌ Error details:", err.response?.data || err.message);
+    const errorData = err.response?.data;
+    console.error("❌ Error details:", errorData || err.message);
 
-    // Return test data if API fails (for debugging)
-    console.log("🧪 Falling back to test data for:", query);
-    return getTestVideos(query);
+    // Check specifically for quota exceeded
+    if (errorData?.error?.code === 403 && errorData?.error?.message?.includes("quota")) {
+      console.error("🛑 CRITICAL: YouTube API Quota Exceeded. Attempting fallback...");
+      const quotaFallback = getTestVideos(query);
+      if (quotaFallback.length > 0) {
+        return quotaFallback;
+      }
+      return [];
+    }
+
+    // Return test data if API fails for other reasons
+    const testData = getTestVideos(query);
+    if (testData.length > 0) {
+      console.log("🧪 Falling back to test data for:", query);
+      return testData;
+    }
+
+    return [];
   }
 };
 
-// Fallback test videos for debugging
+// Fallback test videos for debugging when API is unavailable or quota is exceeded
 const getTestVideos = (query) => {
-  const testVideos = {
-    "Introduction to AI": [{ id: { videoId: "SSE4M0gcmvE" }, snippet: { title: "Introduction to AI" } }],
-    "History of AI": [{ id: { videoId: "mSd9nmPM7Vg" }, snippet: { title: "History of AI" } }],
-    "AI Concepts": [{ id: { videoId: "39zbC_PrNQs" }, snippet: { title: "AI Concepts" } }],
-    "AI Applications": [{ id: { videoId: "xBSMBEowLcY" }, snippet: { title: "AI Applications" } }],
-  };
+  const lowercaseQuery = query.toLowerCase();
 
-  return testVideos[query] || [{ id: { videoId: "dQw4w9WgXcQ" }, snippet: { title: "Fallback Video" } }];
+  const keywordMap = [
+    {
+      keywords: ["variable", "data type", "operator"],
+      video: { id: { videoId: "n4XF6Dcf0oY" }, snippet: { title: "Variables and Data Types in Programming" } }
+    },
+    {
+      keywords: ["control structure", "loop", "if statement", "conditional"],
+      video: { id: { videoId: "m2uxP_S82no" }, snippet: { title: "Control Structures and Loops" } }
+    },
+    {
+      keywords: ["function", "method", "callback"],
+      video: { id: { videoId: "7L_8L3u0X9w" }, snippet: { title: "JavaScript Functions Tutorial" } }
+    },
+    {
+      keywords: ["array", "list", "collection"],
+      video: { id: { videoId: "7W4pQQ20nJg" }, snippet: { title: "Arrays and Lists Explained" } }
+    },
+    {
+      keywords: ["python"],
+      video: { id: { videoId: "rfscVS0vtbw" }, snippet: { title: "Python for Beginners" } }
+    },
+    {
+      keywords: ["react", "nextjs", "tailwind"],
+      video: { id: { videoId: "SqcY0GlETPk" }, snippet: { title: "React and Next.js Crash Course" } }
+    },
+    {
+      keywords: ["introduction", "intro", "basics", "fundamental"],
+      video: { id: { videoId: "SSE4M0gcmvE" }, snippet: { title: "Introduction to AI and Programming" } }
+    },
+    {
+      keywords: ["history", "timeline"],
+      video: { id: { videoId: "mSd9nmPM7Vg" }, snippet: { title: "History of AI" } }
+    },
+    {
+      keywords: ["practice", "project", "build"],
+      video: { id: { videoId: "39zbC_PrNQs" }, snippet: { title: "Programming Practice Project" } }
+    }
+  ];
+
+  // Find the first matching keyword set
+  const match = keywordMap.find(item =>
+    item.keywords.some(keyword => lowercaseQuery.includes(keyword))
+  );
+
+  if (match) {
+    return [match.video];
+  }
+
+  // Final generic fallback for any other programming/tech query
+  return [{ id: { videoId: "zOjov-2OZ0E" }, snippet: { title: "Computer Science and Programming Introduction" } }];
 };
