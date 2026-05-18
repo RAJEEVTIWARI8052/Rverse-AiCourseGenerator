@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useContext } from "react";
 import { useUser } from "@clerk/nextjs";
-// Imports removed
+import Link from "next/link";
 import CourseCard from "./CourseCard";
 import UserCourseListContext from "../../_context/UserCourseListContext";
 
@@ -79,9 +79,9 @@ function UserCourseList() {
           <div className="text-6xl mb-4">🎓</div>
           <h3 className="text-xl font-bold text-gray-300 mb-2">No courses yet</h3>
           <p className="text-gray-500 text-sm mb-6 text-center max-w-xs">Generate your first AI-powered course and it will appear here</p>
-          <a href="/create-course" className="px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-sm hover:scale-105 hover:shadow-[0_0_25px_rgba(147,51,234,0.5)] transition-all">
+          <Link href="/create-course" className="px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-sm hover:scale-105 hover:shadow-[0_0_25px_rgba(147,51,234,0.5)] transition-all">
             + Create First Course
-          </a>
+          </Link>
         </div>
       )}
     </div>
