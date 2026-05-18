@@ -1,6 +1,6 @@
 // app/dashboard/_components/sidebar.js
 "use client"
-import React, { useContext } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { FaHome, FaHistory, FaPowerOff } from "react-icons/fa";
@@ -14,6 +14,11 @@ import { cn } from '../../../lib/utils';
 function Sidebar({ closeSidebar }) {
     const { UserCourseList, setUserCourseList } = useContext(UserCourseListContext)
     const pathname = usePathname();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const Menu = [
         {
@@ -49,13 +54,14 @@ function Sidebar({ closeSidebar }) {
     ]
 
     return (
-        <div className="flex bg-white dark:bg-black w-64 h-full flex-col border-r shadow-lg md:shadow-none overflow-y-auto">
+        <div className="flex glass w-64 h-full flex-col border-r border-white/20 shadow-[8px_0_30px_rgba(0,0,0,0.1)] overflow-y-auto relative z-20 transition-all duration-300">
             {/* Logo */}
-            <div className="flex justify-between items-center p-5 border-b md:border-b-0">
-                <h1 className="text-3xl font-bold gradient-text">Rverse</h1>
+            <div className="flex justify-between items-center p-6 border-b border-white/10 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-pink-600/10 blur-xl"></div>
+                <h1 className="text-3xl font-black gradient-text relative z-10 drop-shadow-md">Rverse</h1>
                 {/* Mobile Close Button */}
                 <button
-                    className="md:hidden text-gray-500"
+                    className="md:hidden text-gray-400 hover:text-white transition-colors z-10 bg-white/5 p-2 rounded-full"
                     onClick={() => closeSidebar && closeSidebar()}
                 >
                     ✕
@@ -63,22 +69,22 @@ function Sidebar({ closeSidebar }) {
             </div>
 
             {/* Navigation Menu */}
-            <ul className="space-y-4 flex-1 p-5">
+            <ul className="space-y-3 flex-1 p-5">
                 {Menu.map((item) => {
                     const isActive = pathname === item.path;
                     return (
                         <li key={item.id}>
                             <Link href={item.path} onClick={() => closeSidebar && closeSidebar()}>
                                 <div className={cn(
-                                    "flex items-center gap-3 cursor-pointer rounded-xl p-3 transition-all duration-300",
+                                    "flex items-center gap-4 cursor-pointer rounded-2xl p-3.5 transition-all duration-500 card-hover",
                                     isActive
-                                        ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg scale-105"
-                                        : "text-gray-600 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-white/5 hover:scale-105"
+                                        ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-[0_8px_20px_-6px_rgba(236,72,153,0.5)] border border-white/20 scale-[1.02]"
+                                        : "text-gray-400 dark:text-gray-300 hover:bg-white/10 dark:hover:bg-white/10 hover:text-white border border-transparent"
                                 )}>
-                                    <div className="text-xl">
+                                    <div className={cn("text-xl transition-transform duration-300", isActive && "scale-110")}>
                                         {item.icon}
                                     </div>
-                                    <h2 className="text-sm font-medium">{item.title}</h2>
+                                    <h2 className="text-[15px] font-bold tracking-wide">{item.title}</h2>
                                 </div>
                             </Link>
                         </li>
@@ -86,27 +92,36 @@ function Sidebar({ closeSidebar }) {
                 })}
             </ul>
 
-            <div className="p-5">
+            <div className="p-5 mt-auto">
                 {/* Progress Section */}
-                <div className="mb-6 p-4 bg-white/50 dark:bg-black/20 rounded-xl border border-white/20">
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium">Credits Used</span>
-                        <span className="text-sm text-gray-500">{UserCourseList?.length || 0}/5</span>
+                <div className="mb-6 p-5 glass rounded-2xl border border-white/10 card-hover group relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent blur opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div className="flex justify-between items-center mb-3 relative z-10">
+                        <span className="text-sm font-bold text-gray-300">Credits Used</span>
+                        <span className="text-sm font-black text-pink-400 bg-pink-400/10 px-2 py-0.5 rounded-md">{UserCourseList?.length || 0}/5</span>
                     </div>
-                    <Progress value={(UserCourseList?.length / 5) * 100} className="h-2 bg-gray-200 dark:bg-gray-700" />
-                    <h2 className="text-xs text-gray-500 mt-2">Upgrade for more</h2>
+                    <Progress value={(UserCourseList?.length / 5) * 100} className="h-2.5 bg-gray-800 shadow-inner rounded-full overflow-hidden" />
+                    <h2 className="text-xs text-gray-400 mt-3 font-medium group-hover:text-purple-300 transition-colors relative z-10">Upgrade for unlimited</h2>
                 </div>
 
-                {/* User Button at bottom */}
-                <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/10 transition-colors">
-                    <UserButton
-                        showName={true}
-                        appearance={{
-                            elements: {
-                                avatarBox: "w-10 h-10 ring-2 ring-purple-500"
-                            }
-                        }}
-                    />
+                {/* User Button at bottom (Hydration Safe) */}
+                <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all duration-300 shadow-lg cursor-pointer hover:shadow-purple-500/20 card-hover">
+                    {mounted ? (
+                        <UserButton
+                            showName={true}
+                            appearance={{
+                                elements: {
+                                    avatarBox: "w-11 h-11 ring-2 ring-purple-500/50 hover:ring-pink-500 transition-all shadow-md",
+                                    userButtonBox: "font-bold text-gray-200",
+                                }
+                            }}
+                        />
+                    ) : (
+                        <div className="flex items-center gap-3">
+                            <div className="w-11 h-11 rounded-full bg-gray-700 animate-pulse ring-2 ring-gray-600"></div>
+                            <div className="h-4 w-24 bg-gray-700 animate-pulse rounded"></div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

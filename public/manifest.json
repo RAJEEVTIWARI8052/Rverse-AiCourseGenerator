@@ -1,0 +1,45 @@
+{
+  "name": "Rverse AI — AI Course Generator",
+  "short_name": "Rverse AI",
+  "description": "Build AI-curated full courses from a single prompt. Get video lessons, transcriptions, study notes, and MCQs — all generated in seconds.",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#060612",
+  "theme_color": "#7c3aed",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Create Course",
+      "short_name": "Create",
+      "url": "/create-course",
+      "description": "Generate a new AI course"
+    },
+    {
+      "name": "Video Intelligence",
+      "short_name": "Video Intel",
+      "url": "/dashboard/video-intel",
+      "description": "Transcribe and analyze a YouTube video"
+    }
+  ]
+}

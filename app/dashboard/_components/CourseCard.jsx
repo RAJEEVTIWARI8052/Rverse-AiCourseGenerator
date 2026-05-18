@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { IoBookOutline, IoEllipsisVerticalOutline } from "react-icons/io5";
@@ -24,6 +24,8 @@ function parseCourseOutput(courseOutput) {
 }
 
 function CourseCard({ course, refreshData, displayUser = false }) {
+  const [isHovered, setIsHovered] = useState(false);
+
   const bannerUrl =
     course?.courseBanner ||
     "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=300&h=200&fit=crop&crop=center";
@@ -75,17 +77,33 @@ function CourseCard({ course, refreshData, displayUser = false }) {
   };
 
   return (
-    <div className="group hover:scale-105 transition-all duration-300 ease-in-out">
-      <div className="shadow-lg rounded-xl flex flex-col gap-3 p-3 glass border border-white/10 cursor-pointer h-full">
+    <div 
+      className="group card-hover w-full h-full relative"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500 -z-10"></div>
+      <div className="shadow-2xl rounded-2xl flex flex-col gap-3 p-4 glass border border-white/20 cursor-pointer h-full z-10 backdrop-blur-2xl relative overflow-hidden bg-white/5 dark:bg-black/20">
         <Link href={`/create-course/${course.courseId}`} passHref>
-          <div className="relative h-[180px] w-full rounded-lg overflow-hidden">
-            <Image
-              loader={({ src }) => src}
-              src={bannerUrl}
-              fill
-              className="object-cover group-hover:scale-110 transition-transform duration-500"
-              alt={course?.name || "Course image"}
-            />
+          <div className="relative h-[200px] w-full rounded-xl overflow-hidden shadow-inner bg-black">
+            {isHovered ? (
+              <video
+                src="https://cdn.pixabay.com/video/2021/08/04/83863-585324025_tiny.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-cover opacity-80"
+              />
+            ) : (
+              <Image
+                loader={({ src }) => src}
+                src={bannerUrl}
+                fill
+                className="object-cover group-hover:scale-110 transition-transform duration-500"
+                alt={course?.name || "Course image"}
+              />
+            )}
           </div>
         </Link>
 

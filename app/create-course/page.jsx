@@ -95,72 +95,130 @@ function CreateCoursePage() {
     }
   }
 
-  if (!isLoaded) return <div className="p-6 text-center">Loading authentication...</div>
-  if (!user) return <div className="p-6 text-center">Please sign in to create a course.</div>
+  if (!isLoaded) return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="glass p-10 rounded-3xl text-center animate-pulse">
+        <div className="w-16 h-16 mx-auto rounded-full bg-purple-500/30 mb-4"></div>
+        <p className="text-gray-400">Loading authentication...</p>
+      </div>
+    </div>
+  )
+
+  if (!user) return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="glass p-10 rounded-3xl text-center">
+        <p className="text-2xl font-bold gradient-text mb-2">Sign In Required</p>
+        <p className="text-gray-400">Please sign in to create a course.</p>
+      </div>
+    </div>
+  )
 
   return (
-    <div className="p-6">
-      {/* Stepper */}
-      <div className="flex flex-col items-center mb-10">
-        <h2 className="text-4xl font-bold gradient-text mb-4">Create Your Course</h2>
-        <div className="flex justify-center p-4 gap-2">
-          {StepperOptions.map((item, index) => (
-            <div key={item.id} className="flex flex-col items-center flex-1 max-w-[100px] mb-2">
-              <div
-                className={`flex items-center justify-center p-3 rounded-full transition-all duration-300 ${activeIndex >= index
-                  ? "bg-purple-600 text-white shadow-lg scale-110"
-                  : "bg-gray-200 dark:bg-gray-800 text-gray-500"
-                  }`}
-              >
-                <item.icon className="w-6 h-6" />
-              </div>
-              <h2 className="hidden md:block md:text-sm mt-2 font-medium text-gray-700 dark:text-gray-300">{item.name}</h2>
-              {index < StepperOptions.length - 1 && (
-                <div
-                  className={`h-1 flex-1 w-full rounded-full mt-2 transition-all duration-500 ${activeIndex > index ? "bg-purple-600" : "bg-gray-200 dark:bg-gray-700"
-                    }`}
-                ></div>
-              )}
-            </div>
-          ))}
+    <div className="min-h-screen relative">
+      {/* Background depth layers */}
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-purple-700/10 rounded-full blur-[120px] pointer-events-none -z-10" />
+      <div className="fixed bottom-0 right-0 w-[500px] h-[500px] bg-pink-700/10 rounded-full blur-[100px] pointer-events-none -z-10" />
+
+      <div className="p-6 max-w-4xl mx-auto">
+
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-5 py-2 mb-6 backdrop-blur-md">
+            <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
+            <span className="text-sm font-semibold text-gray-300 tracking-widest uppercase">AI Course Builder</span>
+          </div>
+          <h2 className="text-5xl font-black gradient-text mb-3">Create Your Course</h2>
+          <p className="text-gray-400 text-lg">3 steps to your personalized AI curriculum</p>
         </div>
-      </div>
 
-      <div className="px-10 md:px-20 lg:px-44 mt-10">
-        {/* Step Component */}
-        {activeIndex === 0 ? (
-          <SelectCategory />
-        ) : activeIndex === 1 ? (
-          <TopicDescription />
-        ) : (
-          <SelectOptions />
-        )}
+        {/* 3D Stepper */}
+        <div className="relative mb-12">
+          {/* Progress line behind steps */}
+          <div className="absolute top-[28px] left-[10%] right-[10%] h-[2px] bg-white/5 rounded-full z-0" />
+          <div
+            className="absolute top-[28px] left-[10%] h-[2px] bg-gradient-to-r from-purple-600 to-pink-500 rounded-full z-0 transition-all duration-700"
+            style={{ width: `${(activeIndex / (StepperOptions.length - 1)) * 80}%` }}
+          />
 
-        {/* Buttons */}
-        <div className="flex justify-between mt-10">
-          <Button
-            disabled={activeIndex === 0}
-            variant="outline"
-            onClick={() => setActiveIndex(activeIndex - 1)}
-          >
-            Previous
-          </Button>
-          {activeIndex < 2 ? (
-            <Button disabled={checkStatus()} onClick={() => setActiveIndex(activeIndex + 1)}>
-              Next
-            </Button>
+          <div className="flex justify-around relative z-10">
+            {StepperOptions.map((item, index) => (
+              <div key={item.id} className="flex flex-col items-center gap-3">
+                <div
+                  className={`w-14 h-14 flex items-center justify-center rounded-2xl transition-all duration-500 border ${
+                    activeIndex >= index
+                      ? "bg-gradient-to-br from-purple-600 to-pink-600 border-pink-500/50 shadow-[0_0_20px_rgba(168,85,247,0.5)] scale-110"
+                      : "bg-white/5 border-white/10 text-gray-500"
+                  }`}
+                >
+                  <item.icon className="w-6 h-6 text-white" />
+                </div>
+                <span className={`text-sm font-bold tracking-wide transition-colors duration-300 ${
+                  activeIndex >= index ? "text-purple-300" : "text-gray-600"
+                }`}>
+                  {item.name}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Step Content Card */}
+        <div className="glass rounded-3xl p-8 border border-white/10 relative overflow-hidden mb-8 card-hover"
+          style={{ boxShadow: "0 25px 50px -10px rgba(88,28,135,0.3), inset 0 1px 0 rgba(255,255,255,0.05)" }}
+        >
+          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
+          {activeIndex === 0 ? (
+            <SelectCategory />
+          ) : activeIndex === 1 ? (
+            <TopicDescription />
           ) : (
-            <Button onClick={GenerateCourseLayout} disabled={checkStatus() || loading}>
-              {loading ? "Generating..." : "Generate Course Layout"}
-            </Button>
+            <SelectOptions />
+          )}
+        </div>
+
+        {/* Navigation Buttons */}
+        <div className="flex justify-between items-center mt-6">
+          <button
+            disabled={activeIndex === 0}
+            onClick={() => setActiveIndex(activeIndex - 1)}
+            className="px-8 py-3 rounded-2xl bg-white/5 border border-white/10 text-gray-300 font-bold hover:bg-white/10 hover:scale-105 transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
+          >
+            ← Previous
+          </button>
+
+          {activeIndex < 2 ? (
+            <button
+              disabled={checkStatus()}
+              onClick={() => setActiveIndex(activeIndex + 1)}
+              className="px-10 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold shadow-[0_0_20px_rgba(147,51,234,0.4)] hover:shadow-[0_0_35px_rgba(147,51,234,0.6)] hover:scale-105 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+            >
+              Next →
+            </button>
+          ) : (
+            <button
+              onClick={GenerateCourseLayout}
+              disabled={checkStatus() || loading}
+              className="relative overflow-hidden group px-10 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white font-bold shadow-[0_0_30px_rgba(147,51,234,0.5)] hover:shadow-[0_0_50px_rgba(147,51,234,0.8)] hover:scale-105 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+            >
+              <span className="absolute inset-0 w-full h-full bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 skew-x-12 pointer-events-none" />
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                  </svg>
+                  Generating AI Course...
+                </span>
+              ) : "🚀 Generate Course"}
+            </button>
           )}
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-md flex items-center gap-2">
-            <HiLightBulb className="h-5 w-5" />
-            <span>{error}</span>
+          <div className="mt-6 p-4 glass rounded-2xl border border-red-500/30 flex items-start gap-3 bg-red-500/5">
+            <HiLightBulb className="h-5 w-5 text-red-400 mt-0.5 flex-shrink-0" />
+            <span className="text-red-300 text-sm">{error}</span>
           </div>
         )}
       </div>
