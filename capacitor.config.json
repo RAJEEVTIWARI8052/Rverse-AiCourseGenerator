@@ -3,7 +3,7 @@
   "appName": "Rverse AI",
   "webDir": "public",
   "server": {
-    "url": "https://your-vercel-domain.vercel.app",
-    "cleartext": true
+    "url": "https://rverse-ai-course-generator.vercel.app",
+    "cleartext": false
   }
 }

@@ -4,38 +4,26 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Galaxy Light Theme */
   --background: oklch(0.98 0.01 290);
   --foreground: oklch(0.14 0.05 280);
-  
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.14 0.05 280);
-  
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.14 0.05 280);
-  
-  --primary: oklch(0.55 0.25 290); /* Vivid Violet */
+  --primary: oklch(0.55 0.25 290);
   --primary-foreground: oklch(0.98 0 0);
-  
   --secondary: oklch(0.95 0.03 290);
   --secondary-foreground: oklch(0.35 0.15 290);
-  
   --muted: oklch(0.96 0.02 290);
   --muted-foreground: oklch(0.55 0.05 290);
-  
   --accent: oklch(0.94 0.04 290);
   --accent-foreground: oklch(0.35 0.15 290);
-  
   --destructive: oklch(0.6 0.25 27);
   --destructive-foreground: oklch(0.98 0 0);
-
   --border: oklch(0.9 0.02 290);
   --input: oklch(0.92 0.02 290);
   --ring: oklch(0.55 0.25 290);
-  
   --radius: 0.75rem;
-
-  /* Sidebar */
   --sidebar: oklch(0.98 0 0);
   --sidebar-foreground: oklch(0.25 0.05 290);
   --sidebar-primary: oklch(0.55 0.25 290);
@@ -47,36 +35,25 @@
 }
 
 .dark {
-  /* Galaxy Dark Theme (Deep Space Violet) */
   --background: oklch(0.12 0.06 280);
   --foreground: oklch(0.98 0.01 290);
-  
   --card: oklch(0.15 0.06 280);
   --card-foreground: oklch(0.98 0.01 290);
-  
   --popover: oklch(0.15 0.06 280);
   --popover-foreground: oklch(0.98 0.01 290);
-  
-  --primary: oklch(0.65 0.25 290); /* Lighter Violet for Dark Mode */
+  --primary: oklch(0.65 0.25 290);
   --primary-foreground: oklch(0.12 0.06 280);
-  
   --secondary: oklch(0.25 0.08 280);
   --secondary-foreground: oklch(0.9 0.05 290);
-  
   --muted: oklch(0.2 0.06 280);
   --muted-foreground: oklch(0.7 0.05 290);
-  
   --accent: oklch(0.25 0.08 280);
   --accent-foreground: oklch(0.98 0.01 290);
-  
   --destructive: oklch(0.6 0.25 27);
   --destructive-foreground: oklch(0.98 0 0);
-  
   --border: oklch(0.25 0.06 280);
   --input: oklch(0.25 0.06 280);
   --ring: oklch(0.65 0.25 290);
-  
-  /* Sidebar Dark */
   --sidebar: oklch(0.13 0.07 280);
   --sidebar-foreground: oklch(0.9 0.02 290);
   --sidebar-primary: oklch(0.65 0.25 290);
@@ -88,6 +65,7 @@
 }
 
 @theme inline {
+  --font-sans: var(--font-outfit);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -115,74 +93,156 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    /* Use GPU-accelerated properties only — avoid layout-triggering animations */
+    -webkit-tap-highlight-color: transparent;
   }
   body {
     @apply bg-background text-foreground;
+    /* Smooth scrolling for mobile */
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  /* Remove default cursor lag on mobile */
+  * {
+    touch-action: manipulation;
   }
 }
 
 @layer utilities {
+
+  /* ===== GLASS MORPHISM — mobile-safe (no heavy blur on small screens) ===== */
   .glass {
-    @apply bg-white/10 backdrop-blur-xl border border-white/40 shadow-[0_8px_32px_0_rgba(31,38,135,0.2)] relative overflow-hidden;
-    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.2), 0 8px 32px 0 rgba(31, 38, 135, 0.2);
-    transform-style: preserve-3d;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
   }
-  .dark .glass {
-    @apply bg-black/40 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.6)];
-    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.05), 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+
+  @media (min-width: 768px) {
+    .glass {
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
   }
-  
-  .glass::before {
+
+  /* ===== GRADIENT TEXT ===== */
+  .gradient-text {
+    background: linear-gradient(135deg, #a855f7, #6366f1, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ===== CARD HOVER — uses transform (GPU only, no layout reflow) ===== */
+  .card-hover {
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    will-change: transform;
+  }
+
+  .card-hover:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 20px 40px -10px rgba(147, 51, 234, 0.35);
+    border-color: rgba(168, 85, 247, 0.5);
+  }
+
+  /* Disable hover effects on touch devices to prevent sticky-hover bug */
+  @media (hover: none) {
+    .card-hover:hover {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+
+  /* ===== FLOAT ANIMATION — lightweight CSS only ===== */
+  .float-3d {
+    animation: floatSimple 5s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  @keyframes floatSimple {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
+  }
+
+  /* ===== SHIMMER EFFECT — for loading skeletons ===== */
+  .shimmer {
+    background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  /* ===== GLOW PULSE — for active elements ===== */
+  .glow-pulse {
+    animation: glowPulse 2.5s ease-in-out infinite;
+    will-change: box-shadow;
+  }
+
+  @keyframes glowPulse {
+    0%, 100% { box-shadow: 0 0 15px rgba(147, 51, 234, 0.3); }
+    50% { box-shadow: 0 0 35px rgba(147, 51, 234, 0.6), 0 0 60px rgba(236, 72, 153, 0.2); }
+  }
+
+  /* ===== NEON BORDER — lightweight border animation ===== */
+  .neon-border {
+    position: relative;
+  }
+  .neon-border::after {
     content: '';
     position: absolute;
-    top: 0; left: -100%; width: 50%; height: 100%;
-    background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
-    transform: skewX(-20deg);
-    transition: 0.5s;
+    inset: -1px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, #a855f7, #ec4899, #6366f1);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
     pointer-events: none;
   }
-  
-  .glass:hover::before {
-    left: 200%;
+  .neon-border:hover::after {
+    opacity: 0.6;
   }
 
-  .gradient-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-indigo-500 to-pink-600 drop-shadow-sm;
-  }
-  
-  .dark .gradient-text {
-    @apply bg-gradient-to-r from-purple-400 via-indigo-400 to-pink-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.5)];
+  /* ===== SLIDE IN ANIMATIONS — for page transitions ===== */
+  .slide-up {
+    animation: slideUp 0.4s ease-out forwards;
   }
 
-  .card-hover {
-    @apply transition-all duration-500 hover:-translate-y-2 hover:scale-[1.03] hover:shadow-[0_20px_40px_-10px_rgba(147,51,234,0.3)] hover:border-primary/60;
-    transform: perspective(1000px) rotateX(0deg) rotateY(0deg);
-  }
-  
-  .card-hover:hover {
-    transform: perspective(1000px) rotateX(2deg) rotateY(-2deg);
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
-  /* 3D Floating Element */
-  .float-3d {
-    animation: float3d 6s ease-in-out infinite;
-    transform-style: preserve-3d;
+  .fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
   }
 
-  @keyframes float3d {
-    0% { transform: translateY(0) perspective(1000px) rotateX(0) rotateY(0); }
-    50% { transform: translateY(-15px) perspective(1000px) rotateX(5deg) rotateY(5deg); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
-    100% { transform: translateY(0) perspective(1000px) rotateX(0) rotateY(0); }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* ===== CUSTOM SCROLLBAR (desktop only) ===== */
+  @media (min-width: 768px) {
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(to bottom, #7c3aed, #db2777);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover { background: #a855f7; }
   }
 }
