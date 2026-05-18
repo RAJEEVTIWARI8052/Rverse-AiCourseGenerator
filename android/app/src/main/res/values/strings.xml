@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Rverse AI</string>
+    <string name="title_activity_main">Rverse AI</string>
+    <string name="package_name">com.rverse.aicourse</string>
+    <string name="custom_url_scheme">com.rverse.aicourse</string>
+</resources>

@@ -1,0 +1,9 @@
+{
+  "appId": "com.rverse.aicourse",
+  "appName": "Rverse AI",
+  "webDir": "public",
+  "server": {
+    "url": "https://your-vercel-domain.vercel.app",
+    "cleartext": true
+  }
+}
